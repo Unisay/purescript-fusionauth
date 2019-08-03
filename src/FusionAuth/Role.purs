@@ -2,6 +2,7 @@ module FusionAuth.Role
   ( Role
   , mkRole
   , unRole
+  , unsafeRole
   ) where
 
 import Prelude
@@ -11,7 +12,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty (NonEmptyString)
-import FusionAuth.Name (Name, mkName, unName)
+import FusionAuth.Name (Name, mkName, unName, unsafeName)
 
 
 newtype Role = Role Name
@@ -27,3 +28,6 @@ mkRole = map Role <<< mkName
 
 unRole :: Role -> NonEmptyString
 unRole (Role name) = unName name
+
+unsafeRole :: String -> Role
+unsafeRole = Role <<< unsafeName

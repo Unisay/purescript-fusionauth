@@ -2,6 +2,7 @@ module FusionAuth.Secret
   ( Secret
   , mkSecret
   , unSecret
+  , unsafeSecret
   ) where
 
 import Prelude
@@ -10,9 +11,10 @@ import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Argonaut.Core as Json
 import Data.Either (note)
 import Data.Generic.Rep (class Generic)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe, fromJust)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
+import Partial.Unsafe (unsafePartial)
 
 
 newtype Secret = Secret NonEmptyString
@@ -31,3 +33,6 @@ mkSecret = pure <<< Secret
 
 unSecret :: Secret -> NonEmptyString
 unSecret (Secret nes) = nes
+
+unsafeSecret :: String -> Secret
+unsafeSecret unsafe = Secret $ unsafePartial $ fromJust $ NES.fromString unsafe

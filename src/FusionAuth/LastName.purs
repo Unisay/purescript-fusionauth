@@ -11,7 +11,7 @@ import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
-import Data.String.NonEmpty.Internal (NonEmptyString)
+import Data.String.NonEmpty (NonEmptyString)
 import FusionAuth.Name (Name, mkName, unName, unsafeName)
 
 
@@ -29,5 +29,5 @@ mkLastName name = LastName <$> mkName name
 unLastName :: LastName -> NonEmptyString
 unLastName (LastName name) = unName name
 
-unsafeLastName :: NonEmptyString -> LastName
+unsafeLastName :: String -> LastName
 unsafeLastName = LastName <<< unsafeName

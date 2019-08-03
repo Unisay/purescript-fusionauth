@@ -28,5 +28,5 @@ mkFirstName name = FirstName <$> mkName name
 unFirstName :: FirstName -> NonEmptyString
 unFirstName (FirstName name) = unName name
 
-unsafeFirstName :: NonEmptyString -> FirstName
+unsafeFirstName :: String -> FirstName
 unsafeFirstName = FirstName <<< unsafeName

@@ -4,8 +4,9 @@ module FusionAuth.EncryptionScheme
 
 import Prelude
 
-import Data.Argonaut (class EncodeJson)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Argonaut.Core as Json
+import Data.Either (note)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 
@@ -30,3 +31,11 @@ instance encodeJsonEncryptionScheme :: EncodeJson EncryptionScheme where
     Bcrypt -> as "bcrypt"
     CustomEncryption ce -> as ce
     where as = Json.fromString
+instance decodeJsonEncryptionScheme :: DecodeJson EncryptionScheme where
+  decodeJson json = note "String expected" (Json.toString json) <#> case _ of
+    "salted-md5" -> SaltedMd5
+    "salted-sha256" -> SaltedSha256
+    "salted-hmac-sha256" -> SaltedHmacSha256
+    "salted-pbkdf2-hmac-sha256" -> SaltedPbkdf2HmacSha256
+    "bcrypt" -> Bcrypt
+    other -> CustomEncryption other

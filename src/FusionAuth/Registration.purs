@@ -1,204 +1,126 @@
 module FusionAuth.Registration 
-  ( RegistrationRequest (..)
-  , defaultRequest
-  , RegistrationResponse (..)
-  , User
-  , defaultUser
-  , Registration
+  ( RegistrationOut (..)
+  , RegistrationInRep
+  , RegistrationIn (..)
+  , RegistrationRep
   , defaultRegistration
   ) where
 
-import Data.Argonaut.Core (Json)
+import Prelude
+
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
+import Data.Map (Map)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype)
 import FusionAuth.ApplicationId (ApplicationId)
-import FusionAuth.Email (Email)
-import FusionAuth.EncryptionScheme (EncryptionScheme)
-import FusionAuth.Expiration (Expiration)
-import FusionAuth.FirstName (FirstName)
-import FusionAuth.FullName (FullName)
-import FusionAuth.ImageUrl (ImageUrl)
-import FusionAuth.Iso8601Date (Iso8601Date)
+import FusionAuth.IdentityProviderId (IdentityProviderId)
 import FusionAuth.Language (Language)
-import FusionAuth.LastName (LastName)
-import FusionAuth.MiddleName (MiddleName)
-import FusionAuth.MobilePhone (MobilePhone)
-import FusionAuth.Password (Password)
 import FusionAuth.RegistrationId (RegistrationId)
 import FusionAuth.Role (Role)
-import FusionAuth.Secret (Secret)
 import FusionAuth.Timezone (Timezone)
-import FusionAuth.TwoFactorDelivery (TwoFactorDelivery)
-import FusionAuth.UserId (UserId)
+import FusionAuth.Token (Token)
+import FusionAuth.UnixInstant (UnixInstant)
 import FusionAuth.Username (Username)
 
 
-type Registration =
+type RegistrationRep f r =
   -- | The Id of the Application that this registration is for. 
-  { applicationId :: ApplicationId
+  ( applicationId :: ApplicationId
 
   -- | An object that can hold any information about the User 
   -- | for this registration that should be persisted. 
-  , "data" :: Maybe Json
+  , "data" :: f Json
 
   -- | Locale strings that give, in order, 
   -- | the User’s preferred languages for this registration. 
-  , preferredLanguages :: Maybe (Array Language)
+  , preferredLanguages :: f (Array Language)
 
   -- | The Id of this registration. If this is not specified, 
   -- | FusionAuth will create a random UUID. 
-  , id :: Maybe RegistrationId
+  , id :: f RegistrationId
 
   -- | The list of roles that the User has for this Application. 
-  , roles :: Maybe (Array Role)
+  , roles :: f (Array Role)
 
   -- | The User’s preferred timezone for this Application registration.
   -- | example: 'America/Denver' or 'US/Mountain'
-  , timezone :: Maybe Timezone
+  , timezone :: f Timezone
 
   -- | The username of the User for this Application only. 
-  , username :: Maybe Username 
+  , username :: f Username 
 
-  }
+  | r)
 
-type User =
-  { birthDate :: Maybe Iso8601Date
+newtype RegistrationOut = RegistrationOut {| RegistrationRep Maybe ()}
 
-    -- | The Id to use for the new User. 
-    -- | If absent, FusionAuth generates a random one. 
-  , id :: Maybe UserId
+derive instance newtypeRegistrationOut :: Newtype RegistrationOut _
 
-  -- | An object that can hold any information about the User 
-  -- | that should be persisted. 
-  , "data" :: Maybe Json
+instance encodeJsonRegistrationOut :: EncodeJson RegistrationOut where
+  encodeJson (RegistrationOut r) 
+      = "applicationId" := r.applicationId 
+     ~> "data" :=? r.data
+    ~>? "id" :=? r.id 
+    ~>? "preferredLanguages" :=? r.preferredLanguages 
+    ~>? "roles" :=? r.roles 
+    ~>? "timezone" :=? r.timezone 
+    ~>? "username" :=? r.username 
+    ~>? jsonEmptyObject
 
-  -- | The User’s email address. 
-  -- | An email address is a unique in FusionAuth and stored in lower case. 
-  , email :: Maybe Email
+type RegistrationInRep = 
+  ( authenticationToken :: Maybe Token
 
-  -- | The method for encrypting the User’s password. 
-  , encryptionScheme :: Maybe EncryptionScheme
-
-  -- | The expiration instant of the User’s account. 
-  -- | An expired user is not permitted to login. 
-  , expiry :: Maybe Expiration
-
-  -- | The actual use of this value is up to the 
-  -- | `PasswordEncryptor` implementation. 
-  , factor :: Maybe String
-
-  -- | The first name of the User. 
-  , firstName :: Maybe FirstName
-
-  -- | The User’s last name. 
-  , lastName :: Maybe LastName
-
-  -- | The User’s middle name. 
-  , middleName :: Maybe MiddleName
-
-  -- | The User’s full name as a separate field
-  -- | that is not calculated from firstName and lastName. 
-  , fullName :: Maybe FullName
-
-  -- | The URL that points to an image file that is the User’s profile image. 
-  , imageUrl :: Maybe ImageUrl
-
-  -- | The User’s mobile phone number. 
-  , mobilePhone :: Maybe MobilePhone
+  -- | The instant that this registration was created. 
+  , insertInstant :: UnixInstant
   
-  -- | The User’s plain texts password. 
-  -- | This password will be hashed and the provided value 
-  -- | will never be stored and cannot be retrieved. 
-  , password :: Maybe Password
+  -- | The instant that the User last logged 
+  -- | into the Application for this registration. 
+  , lastLoginInstant :: Maybe UnixInstant
 
-  -- | Indicates that the User’s password needs to be changed 
-  -- | during their next login attempt. 
-  , passwordChangeRequired :: Maybe Boolean
+  -- | Tokens returned from identity providers. 
+  , tokens :: Maybe (Map IdentityProviderId Token)
 
-  -- | Locale strings that give, in order, 
-  -- | the User’s preferred languages. 
-  , preferredLanguages :: Maybe (Array Language)
+  -- | Indicates if this User’s registration has been verified.  
+  , verified :: Boolean
+  )
 
-  -- | The User’s preferred timezone. 
-  -- | The string must be in an IANA time zone format. 
-  , timezone :: Maybe Timezone
+newtype RegistrationIn 
+  = RegistrationIn {| RegistrationRep Maybe RegistrationInRep}
 
-  -- | Determines if the User has two factor authentication 
-  -- | enabled for their account or not. 
-  , twoFactorEnabled :: Maybe Boolean
+derive instance newtypeRegistrationIn :: Newtype RegistrationIn _
 
-  -- | The Base64 encoded secret used to generate Two Factor verification codes. 
-  , twoFactorSecret :: Maybe Secret
+instance decodeJsonRegistrationIn :: DecodeJson RegistrationIn where
+  decodeJson json = do
+    x <- decodeJson json
+    applicationId <- x .: "applicationId"
+    authenticationToken <- x .:? "authenticationToken"
+    tokens <- x .:? "tokens"
+    insertInstant <- x .: "insertInstant"
+    lastLoginInstant <- x .:? "lastLoginInstant"
+    metadata <- x .:? "data"
+    id <- x .:? "id"
+    preferredLanguages <- x .:? "preferredLanguages"
+    roles <- x .:? "roles"
+    timezone <- x .:? "timezone"
+    username <- x .:? "username"
+    verified <- x .: "verified"
+    pure $ RegistrationIn
+      { applicationId
+      , authenticationToken
+      , tokens
+      , "data": metadata
+      , id
+      , insertInstant
+      , lastLoginInstant
+      , preferredLanguages
+      , roles
+      , timezone
+      , username
+      , verified
+      }
 
-  -- | The username of the User. 
-  , username :: Maybe Username
-  }
-
-type RegistrationRequest =
-  -- | Determines if FusionAuth should generate an 
-  -- | Authentication Token for this registration. 
-  { generateAuthenticationToken :: Maybe Boolean
-
-  -- | Whether or not the User is sent an email asking them 
-  -- | to setup their password. This is useful if someone else 
-  -- | is creating an account for a User with an Application. 
-  , sendSetPasswordEmail :: Maybe Boolean
-
-  -- | Indicates to FusionAuth that it should skip registration 
-  -- | verification even if it is enabled for the Application. 
-  , skipRegistrationVerification :: Maybe Boolean
-
-  -- | Whether or not email verification should be skipped or not. 
-  -- | In some cases, you might want to verify User’s emails and 
-  -- | in other cases you won’t. This flag controls that behavior. 
-  , skipVerification :: Maybe Boolean
-
-  -- | The User’s preferred delivery for verification codes
-  -- | during a two factor login request. 
-  , usersTwoFactorDelivery :: Maybe TwoFactorDelivery
-
-  , user :: User
-
-  , registration :: Registration
-  
-  }
-
-defaultRequest :: User -> Registration -> RegistrationRequest
-defaultRequest user registration =
-  { user
-  , registration
-  , generateAuthenticationToken: Nothing
-  , sendSetPasswordEmail: Nothing
-  , skipRegistrationVerification: Nothing
-  , skipVerification: Nothing
-  , usersTwoFactorDelivery: Nothing
-  }
-
-defaultUser :: User
-defaultUser =
-  { birthDate: Nothing
-  , "data": Nothing
-  , email: Nothing
-  , encryptionScheme: Nothing
-  , expiry: Nothing
-  , factor: Nothing
-  , firstName: Nothing
-  , fullName: Nothing
-  , id: Nothing
-  , imageUrl: Nothing
-  , lastName: Nothing
-  , middleName: Nothing
-  , mobilePhone: Nothing
-  , password: Nothing
-  , passwordChangeRequired: Nothing
-  , preferredLanguages: Nothing
-  , timezone: Nothing
-  , twoFactorEnabled: Nothing
-  , twoFactorSecret: Nothing
-  , username: Nothing
-  }
-
-defaultRegistration :: ApplicationId -> Registration
+defaultRegistration :: ApplicationId -> RegistrationOut
 defaultRegistration applicationId =
+  RegistrationOut
   { applicationId
   , "data": Nothing
   , id: Nothing
@@ -208,5 +130,3 @@ defaultRegistration applicationId =
   , username: Nothing
   }
 
-type RegistrationResponse = 
-  {}

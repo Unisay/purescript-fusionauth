@@ -2,6 +2,7 @@ module FusionAuth.Username
   ( Username
   , mkUsername
   , unUsername
+  , unsafeUsername
   ) where
 
 import Prelude
@@ -11,10 +12,12 @@ import Data.Char.Unicode (isAlphaNum)
 import Data.Foldable (all)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Data.String.NonEmpty (NonEmptyString)
+import Data.String.NonEmpty as NES
 import Data.String.NonEmpty.CodeUnits (toCharArray)
 import FusionAuth.Name (Name, mkName, unName)
+import Partial.Unsafe (unsafePartial)
 
 
 newtype Username = Username Name
@@ -34,3 +37,7 @@ mkUsername _ = Nothing
 
 unUsername :: Username -> NonEmptyString
 unUsername (Username name) = unName name
+
+unsafeUsername :: String -> Username
+unsafeUsername name = 
+  unsafePartial $ fromJust $ mkUsername <=< NES.fromString $ name

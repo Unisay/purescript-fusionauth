@@ -12,13 +12,15 @@ import Data.Argonaut.Core as Json
 import Data.Either (note)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe, fromJust)
 import Data.String.NonEmpty (NonEmptyString, trim)
 import Data.String.NonEmpty as NES
+import Partial.Unsafe (unsafePartial)
 
 newtype Name = Name NonEmptyString
 derive instance genericName :: Generic Name _
 derive newtype instance eqName :: Eq Name
+derive newtype instance ordName :: Ord Name
 instance showName :: Show Name where show = genericShow
 instance encodeJsonName :: EncodeJson Name where
   encodeJson (Name nes) = Json.fromString (NES.toString nes)
@@ -32,5 +34,5 @@ mkName nes = Name <$> trim nes
 unName :: Name -> NonEmptyString
 unName (Name name) = name
 
-unsafeName :: NonEmptyString -> Name
-unsafeName = Name
+unsafeName :: String -> Name
+unsafeName unsafe = Name $ unsafePartial $ fromJust $ NES.fromString $ unsafe 

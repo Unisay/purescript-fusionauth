@@ -2,6 +2,7 @@ module FusionAuth.MobilePhone
   ( MobilePhone
   , mkMobilePhone
   , unMobilePhone
+  , unsafeMobilePhone
   ) where
 
 
@@ -13,11 +14,12 @@ import Data.Either (note)
 import Data.Foldable (all)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Set (Set, fromFoldable, member)
 import Data.String.CodeUnits (toCharArray)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
+import Partial.Unsafe (unsafePartial)
 
 
 newtype MobilePhone = MobilePhone NonEmptyString
@@ -43,3 +45,7 @@ mkMobilePhone _ = Nothing
 
 unMobilePhone :: MobilePhone -> NonEmptyString
 unMobilePhone (MobilePhone phone) = phone
+
+unsafeMobilePhone :: String -> MobilePhone
+unsafeMobilePhone unsafe =
+  unsafePartial $ fromJust $ mkMobilePhone <=< NES.fromString $ unsafe

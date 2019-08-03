@@ -4,17 +4,17 @@ module FusionAuth.Expiration
 
 import Prelude
 
-import Data.Argonaut (class EncodeJson, encodeJson)
-import Data.DateTime.Instant (Instant, unInstant)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Generic.Rep (class Generic)
-import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype (class Newtype)
+import FusionAuth.UnixInstant (UnixInstant)
 
 
-newtype Expiration = Expiration Instant
+newtype Expiration = Expiration UnixInstant
 
 derive newtype instance eqExpiration :: Eq Expiration
 derive newtype instance showExpiration :: Show Expiration
 derive instance newtypeExpiration :: Newtype Expiration _
 derive instance genericExpiration :: Generic Expiration _
-instance encodeJsonExpiration :: EncodeJson Expiration where
-  encodeJson = unwrap >>> unInstant >>> unwrap >>> encodeJson
+derive newtype instance encodeJsonExpiration :: EncodeJson Expiration
+derive newtype instance decodeJsonExpiration :: DecodeJson Expiration

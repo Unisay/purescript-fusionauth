@@ -1,5 +1,7 @@
 module FusionAuth.UserId 
   ( UserId (..)
+  , mkUserId
+  , unUserId
   ) where
 
 import Prelude
@@ -29,11 +31,11 @@ instance decodeJsonUserId :: DecodeJson UserId where
     where mbUuid = Json.toString json >>= UUID.parseUUID
 
 
-parseUserId :: String -> Maybe UserId
-parseUserId str | parsed@(Just uuid) <- UUID.parseUUID str = 
+mkUserId :: String -> Maybe UserId
+mkUserId str | parsed@(Just uuid) <- UUID.parseUUID str = 
   parsed <#> UserId
-parseUserId _ = Nothing
+mkUserId _ = Nothing
 
-renderUserId :: UserId -> String
-renderUserId (UserId uuid) = UUID.toString uuid
+unUserId :: UserId -> String
+unUserId (UserId uuid) = UUID.toString uuid
 

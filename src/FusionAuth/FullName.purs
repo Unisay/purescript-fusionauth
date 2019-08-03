@@ -29,5 +29,5 @@ mkFullName name = FullName <$> mkName name
 unFullName :: FullName -> NonEmptyString
 unFullName (FullName name) = unName name
 
-unsafeFullName :: NonEmptyString -> FullName
+unsafeFullName :: String -> FullName
 unsafeFullName = FullName <<< unsafeName
