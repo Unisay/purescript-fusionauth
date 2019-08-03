@@ -1,0 +1,14 @@
+{
+  "name": "purescript-fusionauth",
+  "version": "1.0.0",
+  "description": "FusionAuth API client",
+  "main": "index.js",
+  "repository": "https://github.com/Unisay/purescript-fusionauth",
+  "author": "Yuriy Lazarev",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^3.3.2",
+    "uuid-validate": "^0.0.3",
+    "xhr2": "^0.2.0"
+  }
+}
