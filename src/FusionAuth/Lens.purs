@@ -1,5 +1,6 @@
 module FusionAuth.Lens 
-  ( _birthDate
+  ( _authenticationToken
+  , _birthDate
   , _data
   , _email
   , _encryptionScheme
@@ -15,6 +16,7 @@ module FusionAuth.Lens
   , _password
   , _passwordChangeRequired
   , _preferredLanguages
+  , _registration
   , _timezone
   , _token
   , _twoFactorEnabled
@@ -34,6 +36,9 @@ import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(..))
+
+_authenticationToken :: forall s a r. Newtype s { authenticationToken :: a | r } => Lens' s a
+_authenticationToken = _Newtype <<< prop (SProxy :: _ "authenticationToken")
 
 _birthDate :: forall s a r. Newtype s { birthDate :: a | r } => Lens' s a
 _birthDate = _Newtype <<< prop (SProxy :: _ "birthDate")
@@ -82,6 +87,9 @@ _passwordChangeRequired = _Newtype <<< prop (SProxy :: _ "passwordChangeRequired
 
 _preferredLanguages :: forall s a r. Newtype s { preferredLanguages :: a | r } => Lens' s a
 _preferredLanguages = _Newtype <<< prop (SProxy :: _ "preferredLanguages")
+
+_registration :: forall s a r. Newtype s { registration :: a | r } => Lens' s a
+_registration = _Newtype <<< prop (SProxy :: _ "registration")
 
 _timezone :: forall s a r. Newtype s { timezone :: a | r } => Lens' s a
 _timezone = _Newtype <<< prop (SProxy :: _ "timezone")

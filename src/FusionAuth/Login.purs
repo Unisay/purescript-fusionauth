@@ -60,6 +60,8 @@ newtype LoginResponse =
   , user :: UserIn
   }
 
+derive instance newtypeLoginResponse :: Newtype LoginResponse _
+
 instance decodeJsonLoginResponse :: DecodeJson LoginResponse where
   decodeJson json = do
     x <- decodeJson json
