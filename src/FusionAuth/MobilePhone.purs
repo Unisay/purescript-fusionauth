@@ -1,7 +1,7 @@
 module FusionAuth.MobilePhone 
   ( MobilePhone
   , mkMobilePhone
-  , unMobilePhone
+  , printMobilePhone
   , unsafeMobilePhone
   ) where
 
@@ -43,8 +43,8 @@ mkMobilePhone phone
   Just $ MobilePhone phone
 mkMobilePhone _ = Nothing
 
-unMobilePhone :: MobilePhone -> NonEmptyString
-unMobilePhone (MobilePhone phone) = phone
+printMobilePhone :: MobilePhone -> NonEmptyString
+printMobilePhone (MobilePhone phone) = phone
 
 unsafeMobilePhone :: String -> MobilePhone
 unsafeMobilePhone unsafe =

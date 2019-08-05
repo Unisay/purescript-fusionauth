@@ -1,7 +1,7 @@
 module FusionAuth.MiddleName 
   ( MiddleName
   , mkMiddleName
-  , unMiddleName
+  , printMiddleName
   , unsafeMiddleName
   ) where
 
@@ -12,7 +12,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty (NonEmptyString)
-import FusionAuth.Name (Name, mkName, unName, unsafeName)
+import FusionAuth.Name (Name, mkName, printName, unsafeName)
 
 
 newtype MiddleName = MiddleName Name
@@ -26,8 +26,8 @@ derive newtype instance decodeJsonMiddleName :: DecodeJson MiddleName
 mkMiddleName :: NonEmptyString -> Maybe MiddleName
 mkMiddleName name = MiddleName <$> mkName name
 
-unMiddleName :: MiddleName -> NonEmptyString
-unMiddleName (MiddleName name) = unName name
+printMiddleName :: MiddleName -> String
+printMiddleName (MiddleName name) = printName name
 
 unsafeMiddleName :: String -> MiddleName
 unsafeMiddleName = MiddleName <<< unsafeName

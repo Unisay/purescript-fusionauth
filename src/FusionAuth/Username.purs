@@ -1,7 +1,7 @@
 module FusionAuth.Username 
   ( Username
   , mkUsername
-  , unUsername
+  , printUsername
   , unsafeUsername
   ) where
 
@@ -15,8 +15,8 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..), fromJust)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
-import Data.String.NonEmpty.CodeUnits (toCharArray)
-import FusionAuth.Name (Name, mkName, unName)
+import Data.String.CodeUnits (toCharArray)
+import FusionAuth.Name (Name, mkName, printName)
 import Partial.Unsafe (unsafePartial)
 
 
@@ -31,12 +31,12 @@ derive newtype instance decodeJsonUsername :: DecodeJson Username
 mkUsername :: NonEmptyString -> Maybe Username
 mkUsername nes 
   | name <- mkName nes
-  , Just true <- all isAlphaNum <<< toCharArray <<< unName <$> name =
+  , Just true <- all isAlphaNum <<< toCharArray <<< printName <$> name =
   Username <$> name
 mkUsername _ = Nothing
 
-unUsername :: Username -> NonEmptyString
-unUsername (Username name) = unName name
+printUsername :: Username -> String
+printUsername (Username name) = printName name
 
 unsafeUsername :: String -> Username
 unsafeUsername name = 

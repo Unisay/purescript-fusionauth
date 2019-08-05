@@ -1,7 +1,7 @@
 module FusionAuth.Secret 
   ( Secret
   , mkSecret
-  , unSecret
+  , printSecret
   , unsafeSecret
   ) where
 
@@ -31,8 +31,8 @@ instance decodeJsonSecret :: DecodeJson Secret where
 mkSecret :: NonEmptyString -> Maybe Secret
 mkSecret = pure <<< Secret
 
-unSecret :: Secret -> NonEmptyString
-unSecret (Secret nes) = nes
+printSecret :: Secret -> NonEmptyString
+printSecret (Secret nes) = nes
 
 unsafeSecret :: String -> Secret
 unsafeSecret unsafe = Secret $ unsafePartial $ fromJust $ NES.fromString unsafe

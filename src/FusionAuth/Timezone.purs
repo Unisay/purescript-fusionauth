@@ -1,7 +1,7 @@
 module FusionAuth.Timezone 
   ( Timezone
   , mkTimezone
-  , unTimezone
+  , printTimezone
   , unsafeTimezone
   ) where
 
@@ -13,7 +13,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe, fromJust)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
-import FusionAuth.Name (Name, mkName, unName)
+import FusionAuth.Name (Name, mkName, printName)
 import Partial.Unsafe (unsafePartial)
 
 
@@ -28,8 +28,8 @@ derive newtype instance decodeJsonTimezone :: DecodeJson Timezone
 mkTimezone :: NonEmptyString -> Maybe Timezone
 mkTimezone name = Timezone <$> mkName name
 
-unTimezone :: Timezone -> NonEmptyString
-unTimezone (Timezone name) = unName name
+printTimezone :: Timezone -> String
+printTimezone (Timezone name) = printName name
 
 unsafeTimezone :: String -> Timezone
 unsafeTimezone unsafe =

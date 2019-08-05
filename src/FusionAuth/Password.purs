@@ -1,7 +1,7 @@
 module FusionAuth.Password 
   ( Password
   , mkPassword
-  , unPassword
+  , printPassword
   , unsafePassword
   ) where
 
@@ -29,8 +29,8 @@ instance decodeJsonPassword :: DecodeJson Password where
 mkPassword :: NonEmptyString -> Maybe Password
 mkPassword = pure <<< Password
 
-unPassword :: Password -> NonEmptyString
-unPassword (Password password) = password
+printPassword :: Password -> NonEmptyString
+printPassword (Password password) = password
 
 unsafePassword :: String -> Password
 unsafePassword unsafe = 

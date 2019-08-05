@@ -1,7 +1,7 @@
 module FusionAuth.Name 
   ( Name   
   , mkName
-  , unName 
+  , printName 
   , unsafeName
   ) where
 
@@ -31,8 +31,8 @@ instance decodeJsonName :: DecodeJson Name where
 mkName :: NonEmptyString -> Maybe Name
 mkName nes = Name <$> trim nes
 
-unName :: Name -> NonEmptyString
-unName (Name name) = name
+printName :: Name -> String
+printName (Name name) = NES.toString name
 
 unsafeName :: String -> Name
 unsafeName unsafe = Name $ unsafePartial $ fromJust $ NES.fromString $ unsafe 

@@ -1,7 +1,7 @@
 module FusionAuth.Role 
   ( Role
   , mkRole
-  , unRole
+  , printRole
   , unsafeRole
   ) where
 
@@ -12,7 +12,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty (NonEmptyString)
-import FusionAuth.Name (Name, mkName, unName, unsafeName)
+import FusionAuth.Name (Name, mkName, printName, unsafeName)
 
 
 newtype Role = Role Name
@@ -26,8 +26,8 @@ derive newtype instance decodeJsonRole :: DecodeJson Role
 mkRole :: NonEmptyString -> Maybe Role
 mkRole = map Role <<< mkName
 
-unRole :: Role -> NonEmptyString
-unRole (Role name) = unName name
+printRole :: Role -> String
+printRole (Role name) = printName name
 
 unsafeRole :: String -> Role
 unsafeRole = Role <<< unsafeName

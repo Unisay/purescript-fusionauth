@@ -1,7 +1,7 @@
 module FusionAuth.UserId 
   ( UserId (..)
   , mkUserId
-  , unUserId
+  , printUserId
   ) where
 
 import Prelude
@@ -36,6 +36,6 @@ mkUserId str | parsed@(Just uuid) <- UUID.parseUUID str =
   parsed <#> UserId
 mkUserId _ = Nothing
 
-unUserId :: UserId -> String
-unUserId (UserId uuid) = UUID.toString uuid
+printUserId :: UserId -> String
+printUserId (UserId uuid) = UUID.toString uuid
 

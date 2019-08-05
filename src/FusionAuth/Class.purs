@@ -35,12 +35,12 @@ import Data.Maybe (Maybe(..), maybe)
 import Data.Semigroup.Foldable (intercalate)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Foreign.Object as StrMap
-import FusionAuth.ApiKey (ApiKey, unApiKey)
+import FusionAuth.ApiKey (ApiKey, printApiKey)
 import FusionAuth.ApiUrl (ApiUrl, unApiUrl)
 import FusionAuth.Lens (_id, _user)
 import FusionAuth.Login (LoginRequest, LoginResponse)
 import FusionAuth.Register (RegisterRequest, RegisterResponse)
-import FusionAuth.UserId (unUserId)
+import FusionAuth.UserId (printUserId)
 import Record (merge)
 
 class FusionAuthM m where
@@ -126,7 +126,7 @@ instance fusionAuthMonadAff ::
   registerUser req = do
     let 
       path = "/user/registration" 
-        <> maybe "" (unUserId >>> append "/") (req ^. _user <<< _id)
+        <> maybe "" (printUserId >>> append "/") (req ^. _user <<< _id)
     postJson path req \ctx@{ status: StatusCode code, responseBody } -> 
       case code of
         200 -> Nothing
@@ -187,7 +187,7 @@ postJson path requestPayload errorHandler = do
     , method = Left POST
     , responseFormat = ResponseFormat.json
     , content = Just $ json requestJson
-    , headers = [RequestHeader "Authorization" $ unApiKey apiKey]
+    , headers = [RequestHeader "Authorization" $ printApiKey apiKey]
     }
   let errorContext = { requestBody: stringify requestJson, status }
   case body of

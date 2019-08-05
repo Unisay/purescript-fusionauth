@@ -1,7 +1,7 @@
 module FusionAuth.Language 
   ( Language
   , mkLanguage
-  , unLanguage
+  , printLanguage
   ) where
 
 import Prelude
@@ -11,7 +11,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty.Internal (NonEmptyString)
-import FusionAuth.Name (Name, mkName, unName)
+import FusionAuth.Name (Name, mkName, printName)
 
 
 newtype Language = Language Name
@@ -25,5 +25,5 @@ derive newtype instance decodeJsonLanguage :: DecodeJson Language
 mkLanguage :: NonEmptyString -> Maybe Language
 mkLanguage name = Language <$> mkName name
 
-unLanguage :: Language -> NonEmptyString
-unLanguage (Language name) = unName name
+printLanguage :: Language -> String
+printLanguage (Language name) = printName name

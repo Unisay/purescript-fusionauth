@@ -1,7 +1,7 @@
 module FusionAuth.FirstName 
   ( FirstName
   , mkFirstName
-  , unFirstName
+  , printFirstName
   ) where
 
 import Prelude
@@ -11,7 +11,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty.Internal (NonEmptyString)
-import FusionAuth.Name (Name, mkName, unName, unsafeName)
+import FusionAuth.Name (Name, mkName, printName, unsafeName)
 
 
 newtype FirstName = FirstName Name
@@ -25,8 +25,8 @@ derive newtype instance decodeJsonFirstName :: DecodeJson FirstName
 mkFirstName :: NonEmptyString -> Maybe FirstName
 mkFirstName name = FirstName <$> mkName name
 
-unFirstName :: FirstName -> NonEmptyString
-unFirstName (FirstName name) = unName name
+printFirstName :: FirstName -> String
+printFirstName (FirstName name) = printName name
 
 unsafeFirstName :: String -> FirstName
 unsafeFirstName = FirstName <<< unsafeName

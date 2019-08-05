@@ -1,7 +1,7 @@
 module FusionAuth.Token 
   ( Token
   , mkToken
-  , unToken
+  , printToken
   , unsafeToken
   ) where
 
@@ -31,8 +31,8 @@ instance decodeJsonToken :: DecodeJson Token where
 mkToken :: NonEmptyString -> Maybe Token
 mkToken = pure <<< Token
 
-unToken :: Token -> NonEmptyString
-unToken (Token password) = password
+printToken :: Token -> String
+printToken (Token password) = NES.toString password
 
 unsafeToken :: String -> Token
 unsafeToken unsafe = 

@@ -1,7 +1,7 @@
 module FusionAuth.Email 
   ( Email
   , mkEmail
-  , unEmail
+  , printEmail
   , unsafeEmail
   ) where
 
@@ -33,8 +33,8 @@ mkEmail :: NonEmptyString -> Maybe Email
 mkEmail email | contains (Pattern "@") email = Just $ Email email
 mkEmail _ = Nothing
 
-unEmail :: Email -> NonEmptyString
-unEmail (Email email) = email
+printEmail :: Email -> String
+printEmail (Email email) = NES.toString email
 
 unsafeEmail :: String -> Email
 unsafeEmail unsafe = Email $ unsafePartial $ fromJust $ NES.fromString unsafe

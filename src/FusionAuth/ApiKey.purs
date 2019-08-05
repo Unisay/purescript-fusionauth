@@ -2,7 +2,7 @@ module FusionAuth.ApiKey
   ( ApiKey
   , mkApiKey
   , readApiKey
-  , unApiKey
+  , printApiKey
   , unsafeApiKey
   ) where
 
@@ -23,8 +23,8 @@ mkApiKey = ApiKey
 readApiKey :: String -> Maybe ApiKey
 readApiKey = map ApiKey <<< NES.fromString
 
-unApiKey :: ApiKey -> String
-unApiKey (ApiKey key) = NES.toString key
+printApiKey :: ApiKey -> String
+printApiKey (ApiKey key) = NES.toString key
 
 unsafeApiKey :: String -> ApiKey
 unsafeApiKey unsafe = ApiKey $ unsafePartial $ fromJust $ NES.fromString unsafe
