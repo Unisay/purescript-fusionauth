@@ -16,6 +16,7 @@ module FusionAuth.Lens
   , _passwordChangeRequired
   , _preferredLanguages
   , _timezone
+  , _token
   , _twoFactorEnabled
   , _twoFactorSecret
   , _user
@@ -84,6 +85,9 @@ _preferredLanguages = _Newtype <<< prop (SProxy :: _ "preferredLanguages")
 
 _timezone :: forall s a r. Newtype s { timezone :: a | r } => Lens' s a
 _timezone = _Newtype <<< prop (SProxy :: _ "timezone")
+
+_token :: forall s a r. Newtype s { token :: a | r } => Lens' s a
+_token = _Newtype <<< prop (SProxy :: _ "token")
 
 _twoFactorEnabled :: forall s a r. Newtype s { twoFactorEnabled :: a | r } => Lens' s a
 _twoFactorEnabled = _Newtype <<< prop (SProxy :: _ "twoFactorEnabled")

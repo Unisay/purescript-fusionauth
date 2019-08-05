@@ -41,7 +41,7 @@ import FusionAuth.FullName (FullName, mkFullName, printFullName, unsafeFullName)
 import FusionAuth.ImageUrl (ImageUrl) as ImageUrl
 import FusionAuth.Iso8601Date (Iso8601Date(..)) as Iso8601Date
 import FusionAuth.Language (Language, mkLanguage, printLanguage) as Language
-import FusionAuth.Lens (_applicationId, _birthDate, _data, _email, _encryptionScheme, _expiry, _factor, _firstName, _fullName, _generateAuthenticationToken, _id, _imageUrl, _lastName, _loginId, _middleName, _mobilePhone, _noJWT, _password, _passwordChangeRequired, _preferredLanguages, _timezone, _twoFactorEnabled, _twoFactorSecret, _user, _username) as Lens
+import FusionAuth.Lens (_applicationId, _birthDate, _data, _email, _encryptionScheme, _expiry, _factor, _firstName, _fullName, _generateAuthenticationToken, _id, _imageUrl, _lastName, _loginId, _middleName, _mobilePhone, _noJWT, _password, _passwordChangeRequired, _preferredLanguages, _timezone, _token, _twoFactorEnabled, _twoFactorSecret, _user, _username) as Lens
 import FusionAuth.Login (LoginRequest(..), LoginRequestRep, LoginResponse, defaultLoginRequest) as Login
 import FusionAuth.LastName (LastName, mkLastName, printLastName, unsafeLastName) as LastName
 import FusionAuth.MiddleName (MiddleName, mkMiddleName, printMiddleName, unsafeMiddleName) as MiddleName
