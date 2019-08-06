@@ -29,7 +29,7 @@ module FusionAuth
   , module Username
   ) where
 
-import FusionAuth.ApiUrl (ApiUrl(..), unApiUrl) as ApiUrl
+import FusionAuth.ApiUrl (ApiUrl(..), printApiUrl) as ApiUrl
 import FusionAuth.ApiKey (ApiKey, mkApiKey, readApiKey, printApiKey, unsafeApiKey) as ApiKey
 import FusionAuth.ApplicationId (ApplicationId(..), mkApplicationId) as ApplicationId
 import FusionAuth.Class (class FusionAuthM, ErrorContext, ErrorMessage, FusionAuthError(..), loginUser, registerUser) as Class

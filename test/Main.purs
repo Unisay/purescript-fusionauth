@@ -30,9 +30,9 @@ main = launchAff_ do
       # _username `set` FA.mkUsername (nes (SProxy :: SProxy "unisay"))
 
     config = 
-      { apiUrl: FA.ApiUrl 
+      { fusionAuthApiUrl: FA.ApiUrl 
         $ nes (SProxy :: SProxy "http://localhost:9011/api") 
-      , apiKey: FA.mkApiKey 
+      , fusionAuthApiKey: FA.mkApiKey 
         $ nes (SProxy :: SProxy "eRTUGEIpfoC_rvmMrlfpNDILBOfceVaSCmAIjIHyQMQ")
       }
 

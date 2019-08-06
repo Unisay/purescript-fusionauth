@@ -36,7 +36,7 @@ import Data.Semigroup.Foldable (intercalate)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Foreign.Object as StrMap
 import FusionAuth.ApiKey (ApiKey, printApiKey)
-import FusionAuth.ApiUrl (ApiUrl, unApiUrl)
+import FusionAuth.ApiUrl (ApiUrl, printApiUrl)
 import FusionAuth.Lens (_id, _user)
 import FusionAuth.Login (LoginRequest, LoginResponse)
 import FusionAuth.Register (RegisterRequest, RegisterResponse)
@@ -117,10 +117,15 @@ instance showFusionAuthError :: Show FusionAuthError where
 
     where showContext = show
 
+type ApiConfigRep r = 
+  ( fusionAuthApiUrl :: ApiUrl
+  , fusionAuthApiKey :: ApiKey 
+  | r)
+
 instance fusionAuthMonadAff :: 
   ( MonadAff m 
   , MonadThrow FusionAuthError m
-  , MonadAsk { apiUrl :: ApiUrl, apiKey :: ApiKey | r } m
+  , MonadAsk {| ApiConfigRep r} m
   ) => FusionAuthM m where
 
   registerUser req = do
@@ -174,20 +179,20 @@ postJson :: forall a m e r
   => DecodeJson a
   => MonadAff m
   => MonadThrow FusionAuthError m
-  => MonadAsk { apiUrl :: ApiUrl, apiKey :: ApiKey | r } m
+  => MonadAsk {| ApiConfigRep r } m
   => String 
   -> e 
   -> (ResponseErrorContext -> Maybe FusionAuthError) 
   -> m a
 postJson path requestPayload errorHandler = do
-  { apiUrl, apiKey } <- ask
+  { fusionAuthApiUrl, fusionAuthApiKey } <- ask
   let requestJson = encodeJson requestPayload
   { status, body } <- liftAff $ AX.request $ AX.defaultRequest
-    { url = unApiUrl apiUrl <> path
+    { url = printApiUrl fusionAuthApiUrl <> path
     , method = Left POST
     , responseFormat = ResponseFormat.json
     , content = Just $ json requestJson
-    , headers = [RequestHeader "Authorization" $ printApiKey apiKey]
+    , headers = [RequestHeader "Authorization" $ printApiKey fusionAuthApiKey]
     }
   let errorContext = { requestBody: stringify requestJson, status }
   case body of

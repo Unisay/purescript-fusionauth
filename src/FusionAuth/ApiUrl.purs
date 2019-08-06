@@ -1,6 +1,6 @@
 module FusionAuth.ApiUrl 
   ( ApiUrl (..)
-  , unApiUrl
+  , printApiUrl
   ) where
 
 import Prelude
@@ -25,5 +25,5 @@ instance decodeJsonApiUrl :: DecodeJson ApiUrl where
   decodeJson json =
     ApiUrl <$> note "Empty API URL" (Json.toString >=> NES.fromString $ json)
 
-unApiUrl :: ApiUrl -> String
-unApiUrl (ApiUrl nes) = NES.toString nes
+printApiUrl :: ApiUrl -> String
+printApiUrl (ApiUrl nes) = NES.toString nes
