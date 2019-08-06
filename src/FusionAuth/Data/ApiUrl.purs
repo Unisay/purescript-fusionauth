@@ -1,5 +1,6 @@
-module FusionAuth.ApiUrl 
-  ( ApiUrl (..)
+module FusionAuth.Data.ApiUrl 
+  ( ApiUrl
+  , mkApiUrl
   , printApiUrl
   ) where
 
@@ -24,6 +25,9 @@ instance encodeJsonApiUrl :: EncodeJson ApiUrl where
 instance decodeJsonApiUrl :: DecodeJson ApiUrl where
   decodeJson json =
     ApiUrl <$> note "Empty API URL" (Json.toString >=> NES.fromString $ json)
+
+mkApiUrl :: NonEmptyString -> ApiUrl
+mkApiUrl = ApiUrl
 
 printApiUrl :: ApiUrl -> String
 printApiUrl (ApiUrl nes) = NES.toString nes

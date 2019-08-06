@@ -1,4 +1,4 @@
-module FusionAuth.UserId 
+module FusionAuth.Data.UserId 
   ( UserId (..)
   , mkUserId
   , printUserId

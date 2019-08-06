@@ -19,7 +19,7 @@ main :: Effect Unit
 main = launchAff_ do
   applicationId <- maybe (throwError $ error "ApplicationId") pure 
     $ FA.mkApplicationId 
-    $ nes (SProxy :: SProxy "63ba6d7e-af6c-44bf-9516-41c1152ab784")
+    $ nes (SProxy :: SProxy "f4876cf7-befa-47fe-b9da-58de0179d187")
   let
     registration = FA.defaultRegistration applicationId
     email = FA.unsafeEmail "unisay@noreply.github.com"
@@ -30,10 +30,10 @@ main = launchAff_ do
       # _username `set` FA.mkUsername (nes (SProxy :: SProxy "unisay"))
 
     config = 
-      { fusionAuthApiUrl: FA.ApiUrl 
+      { fusionAuthApiUrl: FA.mkApiUrl 
         $ nes (SProxy :: SProxy "http://localhost:9011/api") 
       , fusionAuthApiKey: FA.mkApiKey 
-        $ nes (SProxy :: SProxy "eRTUGEIpfoC_rvmMrlfpNDILBOfceVaSCmAIjIHyQMQ")
+        $ nes (SProxy :: SProxy "joeyL9RcHmc2ND7d52FPyLHisqNuiT882xDtx7ebZTc")
       }
 
   void $ registerLogin user registration email password applicationId

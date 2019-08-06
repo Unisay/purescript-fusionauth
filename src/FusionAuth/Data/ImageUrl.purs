@@ -1,4 +1,4 @@
-module FusionAuth.ImageUrl 
+module FusionAuth.Data.ImageUrl 
   ( ImageUrl
   ) where
 

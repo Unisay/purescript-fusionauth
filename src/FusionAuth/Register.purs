@@ -8,9 +8,9 @@ module FusionAuth.Register
 import Data.Argonaut (class DecodeJson, class EncodeJson, jsonEmptyObject, (:=), (:=?), (~>), (~>?))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import FusionAuth.Registration (RegistrationIn, RegistrationOut)
-import FusionAuth.TwoFactorDelivery (TwoFactorDelivery)
-import FusionAuth.User (UserIn, UserOut)
+import FusionAuth.Data.Registration (RegistrationIn, RegistrationOut)
+import FusionAuth.Data.TwoFactorDelivery (TwoFactorDelivery)
+import FusionAuth.Data.User (UserIn, UserOut)
 
 type RegisterRequestRep f r =
   -- | Determines if FusionAuth should generate an 

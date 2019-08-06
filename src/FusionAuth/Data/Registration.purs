@@ -1,4 +1,4 @@
-module FusionAuth.Registration 
+module FusionAuth.Data.Registration 
   ( RegistrationOut (..)
   , RegistrationInRep
   , RegistrationIn (..)
@@ -12,15 +12,15 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, json
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import FusionAuth.ApplicationId (ApplicationId)
-import FusionAuth.IdentityProviderId (IdentityProviderId)
-import FusionAuth.Language (Language)
-import FusionAuth.RegistrationId (RegistrationId)
-import FusionAuth.Role (Role)
-import FusionAuth.Timezone (Timezone)
-import FusionAuth.Token (Token)
-import FusionAuth.UnixInstant (UnixInstant)
-import FusionAuth.Username (Username)
+import FusionAuth.Data.ApplicationId (ApplicationId)
+import FusionAuth.Data.IdentityProviderId (IdentityProviderId)
+import FusionAuth.Data.Language (Language)
+import FusionAuth.Data.RegistrationId (RegistrationId)
+import FusionAuth.Data.Role (Role)
+import FusionAuth.Data.Timezone (Timezone)
+import FusionAuth.Data.Token (Token)
+import FusionAuth.Data.UnixInstant (UnixInstant)
+import FusionAuth.Data.Username (Username)
 
 
 type RegistrationRep f r =

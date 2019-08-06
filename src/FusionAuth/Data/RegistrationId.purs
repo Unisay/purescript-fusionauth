@@ -1,4 +1,4 @@
-module FusionAuth.RegistrationId 
+module FusionAuth.Data.RegistrationId 
   ( RegistrationId (..)
   ) where
 

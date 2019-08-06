@@ -1,4 +1,4 @@
-module FusionAuth.Email 
+module FusionAuth.Data.Email 
   ( Email
   , mkEmail
   , printEmail

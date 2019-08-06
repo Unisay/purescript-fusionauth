@@ -1,4 +1,4 @@
-module FusionAuth.Secret 
+module FusionAuth.Data.Secret 
   ( Secret
   , mkSecret
   , printSecret

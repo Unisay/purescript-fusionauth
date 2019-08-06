@@ -1,4 +1,4 @@
-module FusionAuth.IdentityProviderId 
+module FusionAuth.Data.IdentityProviderId 
   ( IdentityProviderId (..)
   ) where
 
@@ -6,7 +6,7 @@ import Prelude
 
 import Data.Argonaut (class DecodeJson)
 import Data.Newtype (class Newtype)
-import FusionAuth.Name (Name)
+import FusionAuth.Data.Name (Name)
 
 
 newtype IdentityProviderId = IdentityProviderId Name

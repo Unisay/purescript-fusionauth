@@ -1,4 +1,4 @@
-module FusionAuth.Token 
+module FusionAuth.Data.Token 
   ( Token
   , mkToken
   , printToken

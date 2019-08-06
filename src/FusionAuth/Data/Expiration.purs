@@ -1,4 +1,4 @@
-module FusionAuth.Expiration 
+module FusionAuth.Data.Expiration 
   ( Expiration
   ) where
 
@@ -7,7 +7,7 @@ import Prelude
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype)
-import FusionAuth.UnixInstant (UnixInstant)
+import FusionAuth.Data.UnixInstant (UnixInstant)
 
 
 newtype Expiration = Expiration UnixInstant

@@ -35,12 +35,12 @@ import Data.Maybe (Maybe(..), maybe)
 import Data.Semigroup.Foldable (intercalate)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Foreign.Object as StrMap
-import FusionAuth.ApiKey (ApiKey, printApiKey)
-import FusionAuth.ApiUrl (ApiUrl, printApiUrl)
+import FusionAuth.Data.ApiKey (ApiKey, printApiKey)
+import FusionAuth.Data.ApiUrl (ApiUrl, printApiUrl)
 import FusionAuth.Lens (_id, _user)
 import FusionAuth.Login (LoginRequest, LoginResponse)
 import FusionAuth.Register (RegisterRequest, RegisterResponse)
-import FusionAuth.UserId (printUserId)
+import FusionAuth.Data.UserId (printUserId)
 import Record (merge)
 
 class FusionAuthM m where

@@ -1,4 +1,4 @@
-module FusionAuth.UnixInstant 
+module FusionAuth.Data.UnixInstant 
   ( UnixInstant (..)
   ) where
 

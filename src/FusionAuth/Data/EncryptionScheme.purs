@@ -1,4 +1,4 @@
-module FusionAuth.EncryptionScheme 
+module FusionAuth.Data.EncryptionScheme 
   ( EncryptionScheme (..)
   ) where
 

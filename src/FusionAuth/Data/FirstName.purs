@@ -1,4 +1,4 @@
-module FusionAuth.FirstName 
+module FusionAuth.Data.FirstName 
   ( FirstName
   , mkFirstName
   , printFirstName
@@ -11,7 +11,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe)
 import Data.String.NonEmpty.Internal (NonEmptyString)
-import FusionAuth.Name (Name, mkName, printName, unsafeName)
+import FusionAuth.Data.Name (Name, mkName, printName, unsafeName)
 
 
 newtype FirstName = FirstName Name

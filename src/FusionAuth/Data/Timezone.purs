@@ -1,4 +1,4 @@
-module FusionAuth.Timezone 
+module FusionAuth.Data.Timezone 
   ( Timezone
   , mkTimezone
   , printTimezone
@@ -13,7 +13,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe, fromJust)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
-import FusionAuth.Name (Name, mkName, printName)
+import FusionAuth.Data.Name (Name, mkName, printName)
 import Partial.Unsafe (unsafePartial)
 
 

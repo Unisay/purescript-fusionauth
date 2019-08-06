@@ -1,4 +1,4 @@
-module FusionAuth.ApiKey 
+module FusionAuth.Data.ApiKey 
   ( ApiKey
   , mkApiKey
   , readApiKey

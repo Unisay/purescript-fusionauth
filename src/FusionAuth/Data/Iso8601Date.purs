@@ -1,4 +1,4 @@
-module FusionAuth.Iso8601Date 
+module FusionAuth.Data.Iso8601Date 
   ( Iso8601Date (..)
   ) where
 

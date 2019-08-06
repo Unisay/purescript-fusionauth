@@ -1,4 +1,4 @@
-module FusionAuth.User 
+module FusionAuth.Data.User 
   ( UserRep
   , UserOut (..)
   , UserInRep
@@ -12,24 +12,24 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, json
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.NonEmpty (NonEmpty)
-import FusionAuth.Email (Email)
-import FusionAuth.EncryptionScheme (EncryptionScheme)
-import FusionAuth.Expiration (Expiration)
-import FusionAuth.FirstName (FirstName)
-import FusionAuth.FullName (FullName)
-import FusionAuth.ImageUrl (ImageUrl)
-import FusionAuth.Iso8601Date (Iso8601Date)
-import FusionAuth.Language (Language)
-import FusionAuth.LastName (LastName)
-import FusionAuth.MiddleName (MiddleName)
-import FusionAuth.MobilePhone (MobilePhone)
-import FusionAuth.Password (Password)
-import FusionAuth.Registration (RegistrationIn)
-import FusionAuth.Secret (Secret)
-import FusionAuth.Timezone (Timezone)
-import FusionAuth.UnixInstant (UnixInstant)
-import FusionAuth.UserId (UserId)
-import FusionAuth.Username (Username)
+import FusionAuth.Data.Email (Email)
+import FusionAuth.Data.EncryptionScheme (EncryptionScheme)
+import FusionAuth.Data.Expiration (Expiration)
+import FusionAuth.Data.FirstName (FirstName)
+import FusionAuth.Data.FullName (FullName)
+import FusionAuth.Data.ImageUrl (ImageUrl)
+import FusionAuth.Data.Iso8601Date (Iso8601Date)
+import FusionAuth.Data.Language (Language)
+import FusionAuth.Data.LastName (LastName)
+import FusionAuth.Data.MiddleName (MiddleName)
+import FusionAuth.Data.MobilePhone (MobilePhone)
+import FusionAuth.Data.Password (Password)
+import FusionAuth.Data.Registration (RegistrationIn)
+import FusionAuth.Data.Secret (Secret)
+import FusionAuth.Data.Timezone (Timezone)
+import FusionAuth.Data.UnixInstant (UnixInstant)
+import FusionAuth.Data.UserId (UserId)
+import FusionAuth.Data.Username (Username)
 
 
 

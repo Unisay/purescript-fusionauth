@@ -1,4 +1,4 @@
-module FusionAuth.ApplicationId 
+module FusionAuth.Data.ApplicationId 
   ( ApplicationId (..)
   , mkApplicationId
   ) where

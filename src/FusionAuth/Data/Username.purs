@@ -1,4 +1,4 @@
-module FusionAuth.Username 
+module FusionAuth.Data.Username 
   ( Username
   , mkUsername
   , printUsername
@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..), fromJust)
 import Data.String.NonEmpty (NonEmptyString)
 import Data.String.NonEmpty as NES
 import Data.String.CodeUnits (toCharArray)
-import FusionAuth.Name (Name, mkName, printName)
+import FusionAuth.Data.Name (Name, mkName, printName)
 import Partial.Unsafe (unsafePartial)
 
 

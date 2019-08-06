@@ -1,4 +1,4 @@
-module FusionAuth.TwoFactorDelivery
+module FusionAuth.Data.TwoFactorDelivery
   ( TwoFactorDelivery (..)
   ) where
 

@@ -1,4 +1,4 @@
-module FusionAuth.Password 
+module FusionAuth.Data.Password 
   ( Password
   , mkPassword
   , printPassword

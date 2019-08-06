@@ -11,12 +11,12 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, enco
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import FusionAuth.ApplicationId (ApplicationId)
-import FusionAuth.Email (Email)
-import FusionAuth.Password (Password)
-import FusionAuth.Token (Token)
-import FusionAuth.User (UserIn)
-import FusionAuth.Username (Username)
+import FusionAuth.Data.ApplicationId (ApplicationId)
+import FusionAuth.Data.Email (Email)
+import FusionAuth.Data.Password (Password)
+import FusionAuth.Data.Token (Token)
+import FusionAuth.Data.User (UserIn)
+import FusionAuth.Data.Username (Username)
 
 -- | https://fusionauth.io/docs/v1/tech/apis/login#request
 type LoginRequestRep r =

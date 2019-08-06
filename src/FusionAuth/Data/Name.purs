@@ -1,4 +1,4 @@
-module FusionAuth.Name 
+module FusionAuth.Data.Name 
   ( Name   
   , mkName
   , printName 

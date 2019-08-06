@@ -1,4 +1,4 @@
-module FusionAuth.MobilePhone 
+module FusionAuth.Data.MobilePhone 
   ( MobilePhone
   , mkMobilePhone
   , printMobilePhone
