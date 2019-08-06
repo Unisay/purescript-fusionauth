@@ -1,14 +1,18 @@
 module FusionAuth.Data.Registration 
-  ( RegistrationOut (..)
+  ( RegistrationOut
   , RegistrationInRep
-  , RegistrationIn (..)
+  , RegistrationIn
+  , RegistrationIn' (..)
   , RegistrationRep
   , defaultRegistration
+  , encodeRegistrationOut
+  , decodeRegistrationIn
   ) where
 
 import Prelude
 
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
+import Data.Argonaut (class DecodeJson, Json, decodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
+import Data.Either (Either)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
@@ -51,12 +55,10 @@ type RegistrationRep f r =
 
   | r)
 
-newtype RegistrationOut = RegistrationOut {| RegistrationRep Maybe ()}
+type RegistrationOut = {| RegistrationRep Maybe ()}
 
-derive instance newtypeRegistrationOut :: Newtype RegistrationOut _
-
-instance encodeJsonRegistrationOut :: EncodeJson RegistrationOut where
-  encodeJson (RegistrationOut r) 
+encodeRegistrationOut :: RegistrationOut -> Json
+encodeRegistrationOut r
       = "applicationId" := r.applicationId 
      ~> "data" :=? r.data
     ~>? "id" :=? r.id 
@@ -83,13 +85,17 @@ type RegistrationInRep =
   , verified :: Boolean
   )
 
-newtype RegistrationIn 
-  = RegistrationIn {| RegistrationRep Maybe RegistrationInRep}
+type RegistrationIn = {| RegistrationRep Maybe RegistrationInRep}
 
-derive instance newtypeRegistrationIn :: Newtype RegistrationIn _
+newtype RegistrationIn' = RegistrationIn' RegistrationIn
 
-instance decodeJsonRegistrationIn :: DecodeJson RegistrationIn where
-  decodeJson json = do
+derive instance newtypeRegistrationIn' :: Newtype RegistrationIn' _
+
+instance decodeJsonRegistrationIn :: DecodeJson RegistrationIn' where
+  decodeJson = decodeRegistrationIn >>> map RegistrationIn'
+
+decodeRegistrationIn :: Json -> Either String RegistrationIn
+decodeRegistrationIn json = do
     x <- decodeJson json
     applicationId <- x .: "applicationId"
     authenticationToken <- x .:? "authenticationToken"
@@ -103,7 +109,7 @@ instance decodeJsonRegistrationIn :: DecodeJson RegistrationIn where
     timezone <- x .:? "timezone"
     username <- x .:? "username"
     verified <- x .: "verified"
-    pure $ RegistrationIn
+    pure
       { applicationId
       , authenticationToken
       , tokens
@@ -120,7 +126,6 @@ instance decodeJsonRegistrationIn :: DecodeJson RegistrationIn where
 
 defaultRegistration :: ApplicationId -> RegistrationOut
 defaultRegistration applicationId =
-  RegistrationOut
   { applicationId
   , "data": Nothing
   , id: Nothing

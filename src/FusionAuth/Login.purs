@@ -3,19 +3,20 @@ module FusionAuth.Login
   , LoginRequest (..)
   , LoginResponse (..)
   , defaultLoginRequest
+  , encodeLoginRequest
+  , decodeLoginResponse
   ) where
 
 import Prelude
 
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
+import Data.Argonaut (class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
 import FusionAuth.Data.ApplicationId (ApplicationId)
 import FusionAuth.Data.Email (Email)
 import FusionAuth.Data.Password (Password)
 import FusionAuth.Data.Token (Token)
-import FusionAuth.Data.User (UserIn)
+import FusionAuth.Data.User (UserIn, decodeUserIn)
 import FusionAuth.Data.Username (Username)
 
 -- | https://fusionauth.io/docs/v1/tech/apis/login#request
@@ -27,16 +28,14 @@ type LoginRequestRep r =
   | r
   )
 
-newtype LoginRequest = LoginRequest {| LoginRequestRep ()}
+type LoginRequest = {| LoginRequestRep ()}
 
-derive instance newtypeLoginRequest :: Newtype LoginRequest _
-
-instance encodeJsonLoginRequestNT :: EncodeJson LoginRequest where
-  encodeJson (LoginRequest u) 
-      = "loginId" := or u.loginId
-     ~> "password" := or u.password
-     ~> "applicationId" :=? u.applicationId
-    ~>? "noJWT" :=? u.noJWT
+encodeLoginRequest :: LoginRequest -> Json
+encodeLoginRequest r
+      = "loginId" := or r.loginId
+     ~> "password" := or r.password
+     ~> "applicationId" :=? r.applicationId
+    ~>? "noJWT" :=? r.noJWT
     ~>? jsonEmptyObject
      where 
      or :: forall a b. EncodeJson a => EncodeJson b => Either a b -> Json
@@ -44,7 +43,6 @@ instance encodeJsonLoginRequestNT :: EncodeJson LoginRequest where
     
 defaultLoginRequest :: Email -> Password -> LoginRequest
 defaultLoginRequest email password =
-  LoginRequest
   { loginId: Left email
   , password: Left password
   , applicationId: Nothing
@@ -52,20 +50,16 @@ defaultLoginRequest email password =
   }
 
 
-
-newtype LoginResponse =
-  LoginResponse
+type LoginResponse =
   { token :: Token
   , refreshToken :: Maybe Token
   , user :: UserIn
   }
 
-derive instance newtypeLoginResponse :: Newtype LoginResponse _
-
-instance decodeJsonLoginResponse :: DecodeJson LoginResponse where
-  decodeJson json = do
-    x <- decodeJson json
-    token <- x .: "token"
-    refreshToken <- x .:? "refreshToken"
-    user <- x .: "user"
-    pure $ LoginResponse { token, refreshToken, user }
+decodeLoginResponse :: Json -> Either String LoginResponse
+decodeLoginResponse json = do
+  x <- decodeJson json
+  token <- x .: "token"
+  refreshToken <- x .:? "refreshToken"
+  user <- x .: "user" >>= decodeUserIn
+  pure { token, refreshToken, user }

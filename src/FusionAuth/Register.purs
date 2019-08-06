@@ -1,16 +1,31 @@
 module FusionAuth.Register
   ( RegisterRequestRep
-  , RegisterRequest (..)
-  , RegisterResponse (..)
+  , RegisterRequest
+  , RegisterResponse(..)
   , defaultRegisterRequest
+  , encodeRegisterRequest
+  , DuplicateField (..)
   ) where
 
-import Data.Argonaut (class DecodeJson, class EncodeJson, jsonEmptyObject, (:=), (:=?), (~>), (~>?))
+import Prelude
+
+import Data.Argonaut (class DecodeJson, Json, decodeJson, jsonEmptyObject, (.:), (:=), (:=?), (~>), (~>?))
+import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
-import FusionAuth.Data.Registration (RegistrationIn, RegistrationOut)
+import FusionAuth.Data.Email (Email)
+import FusionAuth.Data.Registration (RegistrationIn, RegistrationOut, decodeRegistrationIn, encodeRegistrationOut)
 import FusionAuth.Data.TwoFactorDelivery (TwoFactorDelivery)
-import FusionAuth.Data.User (UserIn, UserOut)
+import FusionAuth.Data.User (UserIn, UserOut, decodeUserIn, encodeUserOut)
+import FusionAuth.Data.Username (Username)
+
+
+data DuplicateField = UserName | UserEmail
+
+derive instance eqDuplicateField :: Eq DuplicateField
+derive instance genericDuplicateField :: Generic DuplicateField _
+instance showDuplicateField :: Show DuplicateField where show = genericShow
 
 type RegisterRequestRep f r =
   -- | Determines if FusionAuth should generate an 
@@ -41,14 +56,12 @@ type RegisterRequestRep f r =
   
   | r)
 
-newtype RegisterRequest = RegisterRequest {| RegisterRequestRep Maybe () }
+type RegisterRequest = {| RegisterRequestRep Maybe () }
 
-derive instance newtypeRegisterRequest :: Newtype RegisterRequest _
-
-instance encodeJsonRegisterRequest :: EncodeJson RegisterRequest where
-  encodeJson (RegisterRequest r) 
-      = "user" := r.user
-     ~> "registration" := r.registration
+encodeRegisterRequest :: RegisterRequest -> Json
+encodeRegisterRequest r
+      = "user" := encodeUserOut r.user
+     ~> "registration" := encodeRegistrationOut r.registration
      ~> "generateAuthenticationToken" :=? r.generateAuthenticationToken
     ~>? "sendSetPasswordEmail" :=? r.sendSetPasswordEmail
     ~>? "skipRegistrationVerification" :=? r.skipRegistrationVerification
@@ -57,18 +70,19 @@ instance encodeJsonRegisterRequest :: EncodeJson RegisterRequest where
     ~>? jsonEmptyObject
 
 
-newtype RegisterResponse 
-  = RegisterResponse
-  { user :: UserIn
-  , registration :: RegistrationIn
-  }
+data RegisterResponse 
+  = UserRegistered { user :: UserIn, registration :: RegistrationIn }
+  | NonUniqueUser (NonEmptyArray DuplicateField)
 
-derive instance newtypeRegisterResponse :: Newtype RegisterResponse _
-derive newtype instance decodeRegisterResponse :: DecodeJson RegisterResponse
+instance decodeJsonRegisterResponse :: DecodeJson RegisterResponse where
+  decodeJson json = do
+    x <- decodeJson json
+    user <- x .: "user" >>= decodeUserIn
+    registration <- x .: "registration" >>= decodeRegistrationIn
+    pure $ UserRegistered { user, registration }
 
 defaultRegisterRequest :: UserOut -> RegistrationOut -> RegisterRequest
 defaultRegisterRequest user registration =
-  RegisterRequest
   { user
   , registration
   , generateAuthenticationToken: Nothing

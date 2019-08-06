@@ -12,7 +12,6 @@ module FusionAuth
   , module Iso8601Date
   , module Language
   , module LastName
-  , module Lens
   , module Login
   , module MiddleName
   , module MobilePhone
@@ -41,13 +40,12 @@ import FusionAuth.Data.FullName (FullName, mkFullName, printFullName, unsafeFull
 import FusionAuth.Data.ImageUrl (ImageUrl) as ImageUrl
 import FusionAuth.Data.Iso8601Date (Iso8601Date(..)) as Iso8601Date
 import FusionAuth.Data.Language (Language, mkLanguage, printLanguage) as Language
-import FusionAuth.Lens (_applicationId, _authenticationToken, _birthDate, _data, _email, _encryptionScheme, _expiry, _factor, _firstName, _fullName, _generateAuthenticationToken, _id, _imageUrl, _lastName, _loginId, _middleName, _mobilePhone, _noJWT, _password, _passwordChangeRequired, _preferredLanguages, _registration, _timezone, _token, _twoFactorEnabled, _twoFactorSecret, _user, _username) as Lens
-import FusionAuth.Login (LoginRequest(..), LoginRequestRep, LoginResponse, defaultLoginRequest) as Login
+import FusionAuth.Login (LoginRequest, LoginRequestRep, LoginResponse, defaultLoginRequest) as Login
 import FusionAuth.Data.LastName (LastName, mkLastName, printLastName, unsafeLastName) as LastName
 import FusionAuth.Data.MiddleName (MiddleName, mkMiddleName, printMiddleName, unsafeMiddleName) as MiddleName
 import FusionAuth.Data.MobilePhone (MobilePhone, mkMobilePhone, printMobilePhone, unsafeMobilePhone) as MobilePhone
 import FusionAuth.Data.Role (Role, mkRole, printRole, unsafeRole) as Role
-import FusionAuth.Register (RegisterRequest, RegisterRequestRep, RegisterResponse(..), defaultRegisterRequest) as Register
+import FusionAuth.Register (RegisterRequest, RegisterRequestRep, RegisterResponse(..), DuplicateField(..), defaultRegisterRequest) as Register
 import FusionAuth.Data.Registration (RegistrationIn, RegistrationOut, RegistrationRep, defaultRegistration) as Registration
 import FusionAuth.Data.Password (Password, mkPassword, printPassword, unsafePassword) as Password
 import FusionAuth.Data.Secret (Secret, mkSecret, printSecret, unsafeSecret) as Secret

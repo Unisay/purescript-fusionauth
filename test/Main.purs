@@ -5,14 +5,14 @@ import Prelude
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
 import Data.Either (either)
-import Data.Lens (set)
 import Data.Maybe (Maybe(..), maybe)
 import Data.String.NonEmpty (nes)
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (error, launchAff_, throwError)
-import FusionAuth (_applicationId, _email, _generateAuthenticationToken, _password, _timezone, _username)
+import Effect.Class.Console (log)
 import FusionAuth as FA
+import FusionAuth.Register (RegisterResponse(..))
 
 
 main :: Effect Unit
@@ -25,9 +25,10 @@ main = launchAff_ do
     email = FA.unsafeEmail "unisay@noreply.github.com"
     password = FA.unsafePassword "password"
     user = FA.defaultUserOut 
-      # _email `set` Just email
-      # _password `set` Just password
-      # _username `set` FA.mkUsername (nes (SProxy :: SProxy "unisay"))
+      { email = Just email
+      , password = Just password
+      , username = FA.mkUsername (nes (SProxy :: SProxy "unisay"))
+      }
 
     config = 
       { fusionAuthApiUrl: FA.mkApiUrl 
@@ -46,11 +47,16 @@ main = launchAff_ do
   registerLogin user reg email password applicationId = do
     let 
       europeBerlin = FA.mkTimezone $ nes (SProxy :: _ "Europe/Berlin")
-      registration = set _timezone europeBerlin reg 
+      registration = reg { timezone = europeBerlin }
 
-    FA.RegisterResponse _ <- FA.registerUser 
-      $ FA.defaultRegisterRequest user registration
-        # _generateAuthenticationToken `set` Just false 
+    registrationRes <- FA.registerUser $
+      (FA.defaultRegisterRequest user registration) 
+        { generateAuthenticationToken = Just false }
 
-    void $ FA.loginUser $ FA.defaultLoginRequest email password
-      # _applicationId `set` Just applicationId
+    case registrationRes of
+      NonUniqueUser duplicateFields ->
+        log $ "User data is not unique: " <> show duplicateFields
+      UserRegistered _ -> do
+        log "User registered succesfully!"
+        void $ FA.loginUser (FA.defaultLoginRequest email password)
+          { applicationId = Just applicationId }

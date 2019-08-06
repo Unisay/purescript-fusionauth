@@ -9,7 +9,6 @@ module FusionAuth.Class
   , ErrorContextRep
   , ResponseErrorContext
   , ErrorMessage
-  , DuplicateField
   ) where
 
 import Prelude
@@ -21,26 +20,19 @@ import Affjax.ResponseFormat as ResponseFormat
 import Affjax.StatusCode (StatusCode(..))
 import Control.Monad.Error.Class (class MonadThrow, throwError)
 import Control.Monad.Reader (class MonadAsk, ask)
-import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, jsonParser, stringify, (.:?), (.:))
-import Data.Array (concat, fromFoldable, mapMaybe)
-import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Argonaut (class DecodeJson, Json, decodeJson, stringify, (.:), (.:?))
+import Data.Array (concat, elem, fromFoldable, mapMaybe)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either(..), either)
-import Data.Foldable (for_)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
 import Data.HTTP.Method (Method(..))
-import Data.Lens ((^.))
 import Data.Maybe (Maybe(..), maybe)
-import Data.Semigroup.Foldable (intercalate)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Foreign.Object as StrMap
 import FusionAuth.Data.ApiKey (ApiKey, printApiKey)
 import FusionAuth.Data.ApiUrl (ApiUrl, printApiUrl)
-import FusionAuth.Lens (_id, _user)
-import FusionAuth.Login (LoginRequest, LoginResponse)
-import FusionAuth.Register (RegisterRequest, RegisterResponse)
 import FusionAuth.Data.UserId (printUserId)
+import FusionAuth.Login (LoginRequest, LoginResponse, decodeLoginResponse, encodeLoginRequest)
+import FusionAuth.Register (DuplicateField(..), RegisterRequest, RegisterResponse(..), encodeRegisterRequest)
 import Record (merge)
 
 class FusionAuthM m where
@@ -71,12 +63,6 @@ instance decodeJsonServerErrors :: DecodeJson ServerErrors where
     general <- fromFoldable <$> x .:? "generalErrors"
     pure $ ServerErrors { fields, general }
 
-data DuplicateField = UserName | UserEmail
-
-derive instance eqDuplicateField :: Eq DuplicateField
-derive instance genericDuplicateField :: Generic DuplicateField _
-instance showDuplicateField :: Show DuplicateField where show = genericShow
-
 data FusionAuthError
   = JsonDecodingError ErrorContext ErrorMessage 
   | UnmarshallingError ResponseErrorContext ErrorMessage
@@ -84,20 +70,19 @@ data FusionAuthError
   | AuthorizationError ResponseErrorContext
   | UserNotFoundByCredentials ResponseErrorContext
   | ActionPreventedLogin ResponseErrorContext
-  | DuplicateFields (NonEmptyArray DuplicateField) 
   | UserExpired ResponseErrorContext
   | ServerError ResponseErrorContext
   | ResponseStatusError ResponseErrorContext ErrorMessage
 
 instance showFusionAuthError :: Show FusionAuthError where 
   show = case _ of
-    JsonDecodingError ctx msg -> 
-      "Failed to decode JSON response: " <> msg <> showContext ctx
-    UnmarshallingError ctx msg -> 
-      "Failed to unmarshal JSON response: " <> msg <> showContext ctx
-    MalformedRequestError ctx errors -> 
+    JsonDecodingError context msg -> 
+      "Failed to decode JSON response: " <> msg <> showContext context
+    UnmarshallingError context msg -> 
+      "Failed to unmarshal JSON response: " <> msg <> showContext context
+    MalformedRequestError context errors -> 
       "The request was invalid and/or malformed: " 
-        <> show errors <> showContext ctx
+        <> show errors <> showContext context
     AuthorizationError _ ->
       "You did not supply a valid Authorization header. \
       \The header was omitted or your API key was not valid. "
@@ -107,9 +92,6 @@ instance showFusionAuthError :: Show FusionAuthError where
       "The user is currently in an action that has prevented login."
     UserExpired _ ->
       "The user has expired."
-    DuplicateFields dups -> intercalate "; " $ dups <#> case _ of
-      UserName -> "User with such username already registered"
-      UserEmail -> "User with such e-mail already registered"
     ServerError _ ->
       "There was a FusionAuth server error." 
     ResponseStatusError _ msg -> 
@@ -128,45 +110,52 @@ instance fusionAuthMonadAff ::
   , MonadAsk {| ApiConfigRep r} m
   ) => FusionAuthM m where
 
-  registerUser req = do
-    let 
-      path = "/user/registration" 
-        <> maybe "" (printUserId >>> append "/") (req ^. _user <<< _id)
-    postJson path req \ctx@{ status: StatusCode code, responseBody } -> 
-      case code of
-        200 -> Nothing
-        400 -> Just $ 
+  registerUser req =
+    postJson path (encodeRegisterRequest req) handleResponse
+    where 
+    path = "/user/registration" <> maybe "" (printUserId >>> append "/") req.user.id
+
+    handleResponse (context@{ status: StatusCode code }) responseBody
+      | code == 200 =
+          decodeJson responseBody 
+            # either (throwError <<< UnmarshallingError context) pure
+      | code == 400 = 
           let errors@(ServerErrors { fields }) = unmarshalErrors responseBody
               fieldErrors = concat $ StrMap.values fields
               asDupField err 
                 | err.code == "[duplicate]user.username" = Just UserName
                 | err.code == "[duplicate]user.email" = Just UserEmail
                 | otherwise = Nothing 
-          in NEA.fromArray (mapMaybe asDupField fieldErrors) 
-               # maybe (MalformedRequestError ctx errors) DuplicateFields
-        401 -> Just $ AuthorizationError ctx
-        500 -> Just $ ServerError ctx 
-        503 -> Just $ ServerError ctx 
-        cod -> Just $ ResponseStatusError ctx $ 
-          "FusionAuth API responded with status code " <> show cod
+          in case NEA.fromArray (mapMaybe asDupField fieldErrors) of
+              Just dupFields -> 
+                pure $ NonUniqueUser dupFields
+              Nothing -> 
+                throwError $ MalformedRequestError context errors
+      | code == 401 = throwError $ AuthorizationError context
+      | code == 500 = throwError $ ServerError context 
+      | code == 503 = throwError $ ServerError context 
+      | otherwise   = throwError $ ResponseStatusError context $ 
+          "FusionAuth API responded with status code " <> show code
 
-  loginUser req = postJson "/login" req 
-    \ctx@{ status: StatusCode code, responseBody } -> case code of
-      200 -> Nothing
-      202 -> Nothing
-      203 -> Nothing
-      212 -> Nothing
-      242 -> Nothing
-      400 -> Just $ MalformedRequestError ctx $ unmarshalErrors responseBody
-      401 -> Just $ AuthorizationError ctx
-      404 -> Just $ UserNotFoundByCredentials ctx
-      409 -> Just $ ActionPreventedLogin ctx
-      410 -> Just $ UserExpired ctx
-      cod -> Just <<< ResponseStatusError ctx $ 
-        "FusionAuth API responded with status code " <> show cod
+  loginUser req = 
+    postJson "/login" (encodeLoginRequest req) handleResponse
 
-unmarshalErrors :: String -> ServerErrors
-unmarshalErrors = either metaError identity <<< (decodeJson <=< jsonParser)
+    where 
+    handleResponse (context@{ status: StatusCode code }) responseBody 
+      | code `elem` [200, 202, 203, 212, 242] = 
+          decodeLoginResponse responseBody 
+            # either (throwError <<< UnmarshallingError context) pure
+      | code == 400 = throwError $ MalformedRequestError context 
+        $ unmarshalErrors responseBody
+      | code == 401 = throwError $ AuthorizationError context
+      | code == 404 = throwError $ UserNotFoundByCredentials context
+      | code == 409 = throwError $ ActionPreventedLogin context
+      | code == 410 = throwError $ UserExpired context
+      | otherwise   = throwError $ ResponseStatusError context 
+        $ "FusionAuth API responded with status code " <> show code
+
+unmarshalErrors :: Json -> ServerErrors
+unmarshalErrors = either metaError identity <<< decodeJson
 
 metaError :: String -> ServerErrors
 metaError message = ServerErrors
@@ -174,19 +163,16 @@ metaError message = ServerErrors
   , fields: mempty 
   }
 
-postJson :: forall a m e r
-   . EncodeJson e 
-  => DecodeJson a
-  => MonadAff m
+postJson :: forall a m r
+   . MonadAff m
   => MonadThrow FusionAuthError m
   => MonadAsk {| ApiConfigRep r } m
   => String 
-  -> e 
-  -> (ResponseErrorContext -> Maybe FusionAuthError) 
+  -> Json
+  -> (ResponseErrorContext -> Json -> m a)
   -> m a
-postJson path requestPayload errorHandler = do
+postJson path requestJson responseHandler = do
   { fusionAuthApiUrl, fusionAuthApiKey } <- ask
-  let requestJson = encodeJson requestPayload
   { status, body } <- liftAff $ AX.request $ AX.defaultRequest
     { url = printApiUrl fusionAuthApiUrl <> path
     , method = Left POST
@@ -194,14 +180,11 @@ postJson path requestPayload errorHandler = do
     , content = Just $ json requestJson
     , headers = [RequestHeader "Authorization" $ printApiKey fusionAuthApiKey]
     }
-  let errorContext = { requestBody: stringify requestJson, status }
+  let 
+    errorContext = { requestBody: stringify requestJson, status }
   case body of
     Left err -> throwError 
-      $ JsonDecodingError errorContext
-      $ AX.printResponseFormatError err
-    Right responseJson -> do
-      let ctx = errorContext `merge` { responseBody: stringify responseJson }
-      for_ (errorHandler ctx) throwError
-      either (throwError <<< UnmarshallingError ctx) 
-        pure (decodeJson responseJson)
-
+      $ JsonDecodingError errorContext $ AX.printResponseFormatError err
+    Right responseJson -> 
+      let errorContext' = errorContext `merge` { responseBody: stringify responseJson }
+      in responseHandler errorContext' responseJson

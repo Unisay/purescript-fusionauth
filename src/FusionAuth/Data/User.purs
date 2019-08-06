@@ -1,16 +1,19 @@
 module FusionAuth.Data.User 
   ( UserRep
-  , UserOut (..)
+  , UserOut
   , UserInRep
-  , UserIn (..)
+  , UserIn
   , defaultUserOut
+  , encodeUserOut
+  , decodeUserIn
   ) where
 
 import Prelude
 
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, jsonEmptyObject, (.:), (.:?), (:=?), (~>?))
+import Data.Argonaut (Json, decodeJson, jsonEmptyObject, (.:), (.:?), (:=?), (~>?))
+import Data.Either (Either)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype)
+import Data.Newtype (unwrap)
 import Data.NonEmpty (NonEmpty)
 import FusionAuth.Data.Email (Email)
 import FusionAuth.Data.EncryptionScheme (EncryptionScheme)
@@ -24,7 +27,7 @@ import FusionAuth.Data.LastName (LastName)
 import FusionAuth.Data.MiddleName (MiddleName)
 import FusionAuth.Data.MobilePhone (MobilePhone)
 import FusionAuth.Data.Password (Password)
-import FusionAuth.Data.Registration (RegistrationIn)
+import FusionAuth.Data.Registration (RegistrationIn, RegistrationIn')
 import FusionAuth.Data.Secret (Secret)
 import FusionAuth.Data.Timezone (Timezone)
 import FusionAuth.Data.UnixInstant (UnixInstant)
@@ -107,12 +110,10 @@ type UserRep f r =
   
   | r)
 
-newtype UserOut = UserOut {| UserRep Maybe ()}
+type UserOut = {| UserRep Maybe ()}
 
-derive instance newtypeUserOut :: Newtype UserOut _
-
-instance encodeJsonUserOut :: EncodeJson UserOut where 
-  encodeJson (UserOut u) 
+encodeUserOut :: UserOut -> Json
+encodeUserOut u
       = "birthDate" :=? u.birthDate
     ~>? "data" :=? u.data
     ~>? "email" :=? u.email
@@ -143,12 +144,10 @@ type UserInRep =
   , registrations :: Maybe (NonEmpty Array RegistrationIn)
   )
 
-newtype UserIn = UserIn {| UserRep Maybe UserInRep}
+type UserIn = {| UserRep Maybe UserInRep}
 
-derive instance newtypeUserIn :: Newtype UserIn _
-
-instance decodeJsonUserIn :: DecodeJson UserIn where
-  decodeJson json = do
+decodeUserIn :: Json -> Either String UserIn
+decodeUserIn json = do
     x <- decodeJson json
     active <- x .: "active"
     birthDate <- x .:? "birthDate"
@@ -174,8 +173,10 @@ instance decodeJsonUserIn :: DecodeJson UserIn where
     insertInstant <- x .: "insertInstant"
     lastLoginInstant <- x .:? "insertInstant"
     passwordLastUpdateInstant <- x .: "passwordLastUpdateInstant"
-    registrations <- x .:? "registrations"
-    pure $ UserIn
+    registrations  <- x .:? "registrations"
+      # (map >>> map >>> map) (unwrap :: RegistrationIn' -> RegistrationIn)
+    
+    pure
       { active
       , birthDate
       , "data": metadata
@@ -204,7 +205,7 @@ instance decodeJsonUserIn :: DecodeJson UserIn where
       }
 
 defaultUserOut :: UserOut
-defaultUserOut = UserOut
+defaultUserOut =
   { birthDate: Nothing
   , "data": Nothing
   , email: Nothing
