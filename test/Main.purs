@@ -5,12 +5,14 @@ import Prelude
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
 import Data.Either (either)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isJust, isNothing, maybe)
 import Data.String.NonEmpty (nes)
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (error, launchAff_, throwError)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Effect.Exception (throw)
 import FusionAuth as FA
 import FusionAuth.Register (RegisterResponse(..))
 
@@ -58,5 +60,14 @@ main = launchAff_ do
         log $ "User data is not unique: " <> show duplicateFields
       UserRegistered _ -> do
         log "User registered succesfully!"
+
+        let wrongEmail = FA.unsafeEmail "nouser@noreply.github.com"
+          
+        whenM (FA.findUserByEmail wrongEmail <#> isJust)
+          (liftEffect $ throw "User was found by wrong email")
+
+        whenM (FA.findUserByEmail email <#> isNothing)
+          (liftEffect $ throw "User not found by email")
+
         void $ FA.loginUser (FA.defaultLoginRequest email password)
           { applicationId = Just applicationId }

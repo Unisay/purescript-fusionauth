@@ -3,6 +3,7 @@ module FusionAuth.Class
   , FusionAuthError (..)
   , registerUser
   , loginUser
+  , findUserByEmail
   , ServerError
   , ServerErrors
   , ErrorContext
@@ -21,25 +22,31 @@ import Affjax.StatusCode (StatusCode(..))
 import Control.Monad.Error.Class (class MonadThrow, throwError)
 import Control.Monad.Reader (class MonadAsk, ask)
 import Data.Argonaut (class DecodeJson, Json, decodeJson, stringify, (.:), (.:?))
-import Data.Array (concat, elem, fromFoldable, mapMaybe)
+import Data.Array (concat, elem, fromFoldable, intercalate, mapMaybe)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either(..), either)
+import Data.FormURLEncoded (fromArray, encode)
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..), maybe)
+import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Foreign.Object as StrMap
 import FusionAuth.Data.ApiKey (ApiKey, printApiKey)
 import FusionAuth.Data.ApiUrl (ApiUrl, printApiUrl)
+import FusionAuth.Data.Email (Email, printEmail)
+import FusionAuth.Data.User (User, decodeUser)
 import FusionAuth.Data.UserId (printUserId)
 import FusionAuth.Login (LoginRequest, LoginResponse, decodeLoginResponse, encodeLoginRequest)
 import FusionAuth.Register (DuplicateField(..), RegisterRequest, RegisterResponse(..), encodeRegisterRequest)
 import Record (merge)
 
+
 class FusionAuthM m where
   registerUser :: RegisterRequest -> m RegisterResponse
   loginUser :: LoginRequest -> m LoginResponse
+  findUserByEmail :: Email -> m (Maybe User)
 
-type ErrorContextRep r = (status :: StatusCode, requestBody :: String | r)
+type ErrorContextRep r = (status :: StatusCode, requestBody :: Maybe String | r)
 type ErrorContext = {| ErrorContextRep ()}
 type ResponseErrorContext = {| ErrorContextRep (responseBody :: String)}
 type ErrorMessage = String
@@ -154,6 +161,30 @@ instance fusionAuthMonadAff ::
       | otherwise   = throwError $ ResponseStatusError context 
         $ "FusionAuth API responded with status code " <> show code
 
+
+  findUserByEmail email =
+    getJson uri handleResponse
+
+    where 
+    uri = intercalate "?" ["/user", params]
+    params = urlEncodeKV "email" (Just $ printEmail email)
+    handleResponse (context@{ status: StatusCode code}) responseBody
+      | code == 200 = 
+        either (throwError <<< UnmarshallingError context) (Just >>> pure) do
+          json <- decodeJson responseBody
+          json .: "user" >>= decodeUser  
+      | code == 400 = throwError $ MalformedRequestError context 
+          $ unmarshalErrors responseBody
+      | code == 401 = throwError $ AuthorizationError context
+      | code == 404 = pure Nothing
+      | code == 500 = throwError $ ServerError context 
+      | code == 503 = throwError $ ServerError context 
+      | otherwise   = throwError $ ResponseStatusError context $ 
+          "FusionAuth API responded with status code " <> show code
+
+urlEncodeKV :: String -> Maybe String -> String
+urlEncodeKV k mv = encode $ fromArray [Tuple k mv]
+
 unmarshalErrors :: Json -> ServerErrors
 unmarshalErrors = either metaError identity <<< decodeJson
 
@@ -181,7 +212,31 @@ postJson path requestJson responseHandler = do
     , headers = [RequestHeader "Authorization" $ printApiKey fusionAuthApiKey]
     }
   let 
-    errorContext = { requestBody: stringify requestJson, status }
+    errorContext = { requestBody: Just (stringify requestJson), status }
+  case body of
+    Left err -> throwError 
+      $ JsonDecodingError errorContext $ AX.printResponseFormatError err
+    Right responseJson -> 
+      let errorContext' = errorContext `merge` { responseBody: stringify responseJson }
+      in responseHandler errorContext' responseJson
+
+getJson :: forall a m r
+   . MonadAff m
+  => MonadThrow FusionAuthError m
+  => MonadAsk {| ApiConfigRep r } m
+  => String 
+  -> (ResponseErrorContext -> Json -> m a)
+  -> m a
+getJson path responseHandler = do
+  { fusionAuthApiUrl, fusionAuthApiKey } <- ask
+  { status, body } <- liftAff $ AX.request $ AX.defaultRequest
+    { url = printApiUrl fusionAuthApiUrl <> path
+    , method = Left GET
+    , responseFormat = ResponseFormat.json
+    , headers = [RequestHeader "Authorization" $ printApiKey fusionAuthApiKey]
+    }
+  let 
+    errorContext = { requestBody: Nothing, status }
   case body of
     Left err -> throwError 
       $ JsonDecodingError errorContext $ AX.printResponseFormatError err

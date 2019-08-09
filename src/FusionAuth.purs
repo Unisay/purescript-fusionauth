@@ -31,7 +31,7 @@ module FusionAuth
 import FusionAuth.Data.ApiUrl (ApiUrl, mkApiUrl, printApiUrl) as ApiUrl
 import FusionAuth.Data.ApiKey (ApiKey, mkApiKey, readApiKey, printApiKey, unsafeApiKey) as ApiKey
 import FusionAuth.Data.ApplicationId (ApplicationId(..), mkApplicationId) as ApplicationId
-import FusionAuth.Class (class FusionAuthM, ErrorContext, ErrorMessage, FusionAuthError(..), loginUser, registerUser) as Class
+import FusionAuth.Class (class FusionAuthM, ErrorContext, ErrorContextRep, ErrorMessage, FusionAuthError(..), ResponseErrorContext, ServerError, ServerErrors, findUserByEmail, loginUser, registerUser) as Class
 import FusionAuth.Data.Email (Email, mkEmail, printEmail, unsafeEmail) as Email
 import FusionAuth.Data.EncryptionScheme (EncryptionScheme(..)) as EncryptionScheme
 import FusionAuth.Data.Expiration (Expiration) as Expiration
@@ -52,6 +52,6 @@ import FusionAuth.Data.Secret (Secret, mkSecret, printSecret, unsafeSecret) as S
 import FusionAuth.Data.Token (Token, mkToken, printToken, unsafeToken) as Token
 import FusionAuth.Data.Timezone (Timezone, mkTimezone, printTimezone, unsafeTimezone) as Timezone
 import FusionAuth.Data.TwoFactorDelivery (TwoFactorDelivery(..)) as TwoFactorDelivery
-import FusionAuth.Data.User (UserIn, UserOut, UserRep, defaultUserOut) as User
+import FusionAuth.Data.User (User, UserOut, UserOutRep, UserRep, decodeUser, defaultUserOut, encodeUserOut) as User
 import FusionAuth.Data.UserId (UserId(..), mkUserId, printUserId) as UserId
 import FusionAuth.Data.Username (Username, mkUsername, printUsername, unsafeUsername) as Username

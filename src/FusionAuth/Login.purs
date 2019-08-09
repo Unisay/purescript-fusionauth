@@ -16,7 +16,7 @@ import FusionAuth.Data.ApplicationId (ApplicationId)
 import FusionAuth.Data.Email (Email)
 import FusionAuth.Data.Password (Password)
 import FusionAuth.Data.Token (Token)
-import FusionAuth.Data.User (UserIn, decodeUserIn)
+import FusionAuth.Data.User (User, decodeUser)
 import FusionAuth.Data.Username (Username)
 
 -- | https://fusionauth.io/docs/v1/tech/apis/login#request
@@ -53,7 +53,7 @@ defaultLoginRequest email password =
 type LoginResponse =
   { token :: Token
   , refreshToken :: Maybe Token
-  , user :: UserIn
+  , user :: User
   }
 
 decodeLoginResponse :: Json -> Either String LoginResponse
@@ -61,5 +61,5 @@ decodeLoginResponse json = do
   x <- decodeJson json
   token <- x .: "token"
   refreshToken <- x .:? "refreshToken"
-  user <- x .: "user" >>= decodeUserIn
+  user <- x .: "user" >>= decodeUser
   pure { token, refreshToken, user }

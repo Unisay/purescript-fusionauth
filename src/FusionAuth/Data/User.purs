@@ -1,11 +1,11 @@
 module FusionAuth.Data.User 
-  ( UserRep
+  ( UserOutRep
   , UserOut
-  , UserInRep
-  , UserIn
+  , UserRep
+  , User
   , defaultUserOut
   , encodeUserOut
-  , decodeUserIn
+  , decodeUser
   ) where
 
 import Prelude
@@ -36,7 +36,7 @@ import FusionAuth.Data.Username (Username)
 
 
 
-type UserRep f r = 
+type UserOutRep f r = 
   ( birthDate :: f Iso8601Date
 
     -- | The Id to use for the new User. 
@@ -110,7 +110,7 @@ type UserRep f r =
   
   | r)
 
-type UserOut = {| UserRep Maybe ()}
+type UserOut = {| UserOutRep Maybe ()}
 
 encodeUserOut :: UserOut -> Json
 encodeUserOut u
@@ -136,7 +136,7 @@ encodeUserOut u
     ~>? "username" :=? u.username
     ~>?  jsonEmptyObject
 
-type UserInRep = 
+type UserRep = 
   ( active :: Boolean 
   , insertInstant :: UnixInstant
   , lastLoginInstant :: Maybe UnixInstant
@@ -144,10 +144,10 @@ type UserInRep =
   , registrations :: Maybe (NonEmpty Array RegistrationIn)
   )
 
-type UserIn = {| UserRep Maybe UserInRep}
+type User = {| UserOutRep Maybe UserRep}
 
-decodeUserIn :: Json -> Either String UserIn
-decodeUserIn json = do
+decodeUser :: Json -> Either String User
+decodeUser json = do
     x <- decodeJson json
     active <- x .: "active"
     birthDate <- x .:? "birthDate"

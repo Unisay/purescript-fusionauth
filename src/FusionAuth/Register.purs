@@ -14,11 +14,9 @@ import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import FusionAuth.Data.Email (Email)
 import FusionAuth.Data.Registration (RegistrationIn, RegistrationOut, decodeRegistrationIn, encodeRegistrationOut)
 import FusionAuth.Data.TwoFactorDelivery (TwoFactorDelivery)
-import FusionAuth.Data.User (UserIn, UserOut, decodeUserIn, encodeUserOut)
-import FusionAuth.Data.Username (Username)
+import FusionAuth.Data.User (User, UserOut, decodeUser, encodeUserOut)
 
 
 data DuplicateField = UserName | UserEmail
@@ -71,13 +69,13 @@ encodeRegisterRequest r
 
 
 data RegisterResponse 
-  = UserRegistered { user :: UserIn, registration :: RegistrationIn }
+  = UserRegistered { user :: User, registration :: RegistrationIn }
   | NonUniqueUser (NonEmptyArray DuplicateField)
 
 instance decodeJsonRegisterResponse :: DecodeJson RegisterResponse where
   decodeJson json = do
     x <- decodeJson json
-    user <- x .: "user" >>= decodeUserIn
+    user <- x .: "user" >>= decodeUser
     registration <- x .: "registration" >>= decodeRegistrationIn
     pure $ UserRegistered { user, registration }
 

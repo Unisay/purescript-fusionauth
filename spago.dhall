@@ -11,6 +11,7 @@
     , "either"
     , "generics-rep"
     , "formatters"
+    , "form-urlencoded"
     , "string-parsers"
     , "profunctor-lenses"
     , "lists"
