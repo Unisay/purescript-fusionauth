@@ -50,11 +50,13 @@ defaultLoginRequest email password =
   }
 
 
-type LoginResponse =
-  { token :: Token
-  , refreshToken :: Maybe Token
-  , user :: User
-  }
+data LoginResponse 
+  = LoginUnsuccessful
+  | LoginSuccessful
+    { token :: Token
+    , refreshToken :: Maybe Token
+    , user :: User
+    }
 
 decodeLoginResponse :: Json -> Either String LoginResponse
 decodeLoginResponse json = do
@@ -62,4 +64,4 @@ decodeLoginResponse json = do
   token <- x .: "token"
   refreshToken <- x .:? "refreshToken"
   user <- x .: "user" >>= decodeUser
-  pure { token, refreshToken, user }
+  pure $ LoginSuccessful { token, refreshToken, user }

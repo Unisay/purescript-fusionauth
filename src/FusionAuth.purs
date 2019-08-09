@@ -40,7 +40,7 @@ import FusionAuth.Data.FullName (FullName, mkFullName, printFullName, unsafeFull
 import FusionAuth.Data.ImageUrl (ImageUrl) as ImageUrl
 import FusionAuth.Data.Iso8601Date (Iso8601Date(..)) as Iso8601Date
 import FusionAuth.Data.Language (Language, mkLanguage, printLanguage) as Language
-import FusionAuth.Login (LoginRequest, LoginRequestRep, LoginResponse, defaultLoginRequest) as Login
+import FusionAuth.Login (LoginRequest, LoginRequestRep, LoginResponse(..), decodeLoginResponse, defaultLoginRequest, encodeLoginRequest) as Login
 import FusionAuth.Data.LastName (LastName, mkLastName, printLastName, unsafeLastName) as LastName
 import FusionAuth.Data.MiddleName (MiddleName, mkMiddleName, printMiddleName, unsafeMiddleName) as MiddleName
 import FusionAuth.Data.MobilePhone (MobilePhone, mkMobilePhone, printMobilePhone, unsafeMobilePhone) as MobilePhone

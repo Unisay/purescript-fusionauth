@@ -14,7 +14,9 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception (throw)
 import FusionAuth as FA
+import FusionAuth.Login (LoginResponse(..))
 import FusionAuth.Register (RegisterResponse(..))
+import Partial.Unsafe (unsafePartial)
 
 
 main :: Effect Unit
@@ -58,7 +60,7 @@ main = launchAff_ do
     case registrationRes of
       NonUniqueUser duplicateFields ->
         log $ "User data is not unique: " <> show duplicateFields
-      UserRegistered _ -> do
+      UserRegistered _ -> unsafePartial do
         log "User registered succesfully!"
 
         let wrongEmail = FA.unsafeEmail "nouser@noreply.github.com"
@@ -69,5 +71,8 @@ main = launchAff_ do
         whenM (FA.findUserByEmail email <#> isNothing)
           (liftEffect $ throw "User not found by email")
 
-        void $ FA.loginUser (FA.defaultLoginRequest email password)
+        LoginSuccessful _ <- FA.loginUser (FA.defaultLoginRequest email password)
           { applicationId = Just applicationId }
+    
+        log "User logged in succesfully!"
+        pure unit

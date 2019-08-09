@@ -36,7 +36,7 @@ import FusionAuth.Data.ApiUrl (ApiUrl, printApiUrl)
 import FusionAuth.Data.Email (Email, printEmail)
 import FusionAuth.Data.User (User, decodeUser)
 import FusionAuth.Data.UserId (printUserId)
-import FusionAuth.Login (LoginRequest, LoginResponse, decodeLoginResponse, encodeLoginRequest)
+import FusionAuth.Login (LoginRequest, LoginResponse(..), decodeLoginResponse, encodeLoginRequest)
 import FusionAuth.Register (DuplicateField(..), RegisterRequest, RegisterResponse(..), encodeRegisterRequest)
 import Record (merge)
 
@@ -75,7 +75,6 @@ data FusionAuthError
   | UnmarshallingError ResponseErrorContext ErrorMessage
   | MalformedRequestError ResponseErrorContext ServerErrors
   | AuthorizationError ResponseErrorContext
-  | UserNotFoundByCredentials ResponseErrorContext
   | ActionPreventedLogin ResponseErrorContext
   | UserExpired ResponseErrorContext
   | ServerError ResponseErrorContext
@@ -93,8 +92,6 @@ instance showFusionAuthError :: Show FusionAuthError where
     AuthorizationError _ ->
       "You did not supply a valid Authorization header. \
       \The header was omitted or your API key was not valid. "
-    UserNotFoundByCredentials _ ->
-      "The user was not found or the password was incorrect."
     ActionPreventedLogin _ ->
       "The user is currently in an action that has prevented login."
     UserExpired _ ->
@@ -155,7 +152,7 @@ instance fusionAuthMonadAff ::
       | code == 400 = throwError $ MalformedRequestError context 
         $ unmarshalErrors responseBody
       | code == 401 = throwError $ AuthorizationError context
-      | code == 404 = throwError $ UserNotFoundByCredentials context
+      | code == 404 = pure LoginUnsuccessful
       | code == 409 = throwError $ ActionPreventedLogin context
       | code == 410 = throwError $ UserExpired context
       | otherwise   = throwError $ ResponseStatusError context 
