@@ -14,7 +14,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception (throw)
 import FusionAuth as FA
-import FusionAuth.Login (LoginResponse(..))
+import FusionAuth.Login (LoginResponseF(..))
 import FusionAuth.Register (RegisterResponse(..))
 import Partial.Unsafe (unsafePartial)
 

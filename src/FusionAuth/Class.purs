@@ -36,7 +36,7 @@ import FusionAuth.Data.ApiUrl (ApiUrl, printApiUrl)
 import FusionAuth.Data.Email (Email, printEmail)
 import FusionAuth.Data.User (User, decodeUser)
 import FusionAuth.Data.UserId (printUserId)
-import FusionAuth.Login (LoginRequest, LoginResponse(..), decodeLoginResponse, encodeLoginRequest)
+import FusionAuth.Login (LoginRequest, LoginResponseF(..), LoginResponse, decodeLoginResponse, encodeLoginRequest)
 import FusionAuth.Register (DuplicateField(..), RegisterRequest, RegisterResponse(..), encodeRegisterRequest)
 import Record (merge)
 

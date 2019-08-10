@@ -1,7 +1,8 @@
 module FusionAuth.Login 
   ( LoginRequestRep
   , LoginRequest (..)
-  , LoginResponse (..)
+  , LoginResponseF (..)
+  , LoginResponse
   , defaultLoginRequest
   , encodeLoginRequest
   , decodeLoginResponse
@@ -11,6 +12,7 @@ import Prelude
 
 import Data.Argonaut (class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.:), (.:?), (:=), (:=?), (~>), (~>?))
 import Data.Either (Either(..), either)
+import Data.Foldable (class Foldable)
 import Data.Maybe (Maybe(..))
 import FusionAuth.Data.ApplicationId (ApplicationId)
 import FusionAuth.Data.Email (Email)
@@ -50,13 +52,26 @@ defaultLoginRequest email password =
   }
 
 
-data LoginResponse 
+data LoginResponseF a
   = LoginUnsuccessful
-  | LoginSuccessful
+  | LoginSuccessful a
+
+type LoginResponse 
+  = LoginResponseF 
     { token :: Token
     , refreshToken :: Maybe Token
     , user :: User
     }
+
+instance foldableLoginResponse :: Foldable LoginResponseF where
+  foldr f b (LoginSuccessful a) = f a b 
+  foldr _ b _ = b
+
+  foldl f b (LoginSuccessful a) = f b a
+  foldl _ b _ = b
+
+  foldMap f (LoginSuccessful a) = f a
+  foldMap _ _ = mempty
 
 decodeLoginResponse :: Json -> Either String LoginResponse
 decodeLoginResponse json = do
