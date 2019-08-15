@@ -15,6 +15,7 @@ import Partial.Unsafe (unsafePartial)
 
 newtype ApiKey = ApiKey NonEmptyString
 
+instance showApiKey :: Show ApiKey where show = printApiKey
 derive instance eqApiKey :: Eq ApiKey
 
 mkApiKey :: NonEmptyString -> ApiKey
